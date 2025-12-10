@@ -1,0 +1,37 @@
+type TabType = "dashboard" | "list-items" | "sales-history" | "subscriptions" | "chargeback";
+type SalesFilterType = "completed" | "pending" | "flagged";
+
+interface Order {
+    trackingId: string;
+    item: string;
+    price: string;
+    fee: string;
+    date: string;
+}
+
+interface Sale {
+    trackingId: string;
+    buyerId: string;
+    item: string;
+    price: string;
+    fee: string;
+    ip: string;
+    date: string;
+}
+
+interface Dispute {
+    trackingId: string;
+    buyerName: string;
+    buyerEmail: string;
+    buyerIp: string;
+    buyerAccount: string;
+    itemInfo: string;
+    price: string;
+    paymentMethod: string;
+    disputedOn: string;
+}
+
+interface MarketSidebarProps {
+    activeTab: TabType;
+    setActiveTab: (value: TabType) => void
+}

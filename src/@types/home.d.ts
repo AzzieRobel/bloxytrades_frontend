@@ -1,0 +1,1 @@
+type Category = 'general' | 'payment' | 'returns';
