@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { X, Eye, EyeOff } from 'lucide-react';
-import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import toast from 'react-hot-toast';
