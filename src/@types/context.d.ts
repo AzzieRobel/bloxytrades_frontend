@@ -1,16 +1,8 @@
-interface AuthContextType {
-    user: AuthUser | null;
-    token: string | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    login: (emailOrUsername: string, password: string) => Promise<{ success: boolean; message?: string }>;
-    register: (username: string, email: string, password: string, referralCode?: string) => Promise<{ success: boolean; message?: string }>;
-    logout: () => void;
-    googleLogin: () => Promise<void>;
-    requestPasswordReset: (emailOrUsername: string) => Promise<{ success: boolean; message?: string }>;
-}
-
-interface ModalContextType {
+interface GlobalContextType {
+    state: InitialState
+    update: (data: any) => void
+    isLoading: boolean
+    setIsLoading: (loading: boolean) => void
     openLoginModal: () => void;
     openRegisterModal: () => void;
     openForgotPasswordModal: () => void;
@@ -22,4 +14,17 @@ interface ModalContextType {
     isForgotPasswordOpen: boolean;
     switchToRegister: () => void;
     switchToLogin: () => void;
+}
+
+interface InitialState {
+    user: UserState | null,
+}
+
+interface UserState {
+    id: string,
+    username: string,
+    email: string,
+    banned: boolean,
+    createdAt: string,
+    referralCode: string
 }

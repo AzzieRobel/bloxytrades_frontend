@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Mail } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useModal } from '../contexts/ModalContext';
+import { useAuth } from '../hooks/useAuth';
+import { GlobalContext } from '../contexts/context';
 import toast from 'react-hot-toast';
 
 export function ForgotPasswordModal({ isOpen, onClose, onSwitchToLogin }: ForgotPasswordModalProps) {
     const [emailOrUsername, setEmailOrUsername] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { requestPasswordReset } = useAuth();
-    const { closeForgotPasswordModal, openLoginModal } = useModal();
+    const { closeForgotPasswordModal, openLoginModal } = useContext(GlobalContext);
 
     if (!isOpen) return null;
 

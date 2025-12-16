@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { sellerService } from "../services";
+
+import { sellerService } from "@/services";
+import { getToken } from "@/utils/auth";
 
 // Single seller hook that exposes dashboard and sales data + reloaders
 export function useSeller() {
-    const { token } = useAuth();
 
     const [stats, setStats] = useState<SellerDashboardStats>({
         todayTransactions: 0,
@@ -19,6 +19,7 @@ export function useSeller() {
     const [isLoadingSales, setIsLoadingSales] = useState<boolean>(true);
 
     const loadDashboard = useCallback(async () => {
+        const token = getToken();
         if (!token) return;
         try {
             setIsLoadingDashboard(true);
@@ -30,9 +31,10 @@ export function useSeller() {
         } finally {
             setIsLoadingDashboard(false);
         }
-    }, [token, stats]);
+    }, [stats]);
 
     const loadSales = useCallback(async () => {
+        const token = getToken();
         if (!token) return;
         try {
             setIsLoadingSales(true);
@@ -43,13 +45,14 @@ export function useSeller() {
         } finally {
             setIsLoadingSales(false);
         }
-    }, [token]);
+    }, []);
 
     useEffect(() => {
+        const token = getToken();
         if (!token) return;
         void loadDashboard();
         void loadSales();
-    }, [token, loadDashboard, loadSales]);
+    }, [loadDashboard, loadSales]);
 
     return {
         stats,

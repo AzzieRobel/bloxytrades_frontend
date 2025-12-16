@@ -1,8 +1,8 @@
+import { useContext } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-import { AuthProvider } from '../contexts/AuthContext';
-import { ModalProvider, useModal } from '../contexts/ModalContext';
+import { GlobalContext } from '../contexts/context';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { LoginModal } from '../components/loginModal';
@@ -19,7 +19,7 @@ function MainLayoutContent() {
         closeForgotPasswordModal,
         switchToRegister,
         switchToLogin,
-    } = useModal();
+    } = useContext(GlobalContext);
     const location = useLocation();
     const hideFooter = location.pathname.startsWith('/profile');
 
@@ -61,11 +61,5 @@ function MainLayoutContent() {
 }
 
 export default function MainLayout() {
-    return (
-        <AuthProvider>
-            <ModalProvider>
-                <MainLayoutContent />
-            </ModalProvider>
-        </AuthProvider>
-    );
+    return <MainLayoutContent />;
 }

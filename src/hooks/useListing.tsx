@@ -1,14 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { listingService } from "../services";
+import { useCallback, useContext, useEffect, useState } from "react";
 
-// useListing custom hook with internal functions
+import { listingService } from "@/services";
+import { GlobalContext } from "@/contexts/context";
+import { getToken } from "@/utils/auth";
+
 export function useListing() {
-    const { token } = useAuth();
+    const context = useContext(GlobalContext);
+    if (!context) {
+        throw new Error('useListing must be used within a GlobalContextProvider');
+    }
+    const { state, update } = context;
     const [listings, setListings] = useState<SellerListing[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const loadListings = useCallback(async () => {
+        const token = getToken();
         if (!token) return;
         try {
             setIsLoading(true);
@@ -19,20 +25,22 @@ export function useListing() {
         } finally {
             setIsLoading(false);
         }
-    }, [token]);
+    }, []);
 
     useEffect(() => {
+        const token = getToken();
         if (!token) return;
         void loadListings();
-    }, [token, loadListings]);
+    }, [loadListings]);
 
     const createListing = useCallback(
         async (payload: { title: string; description: string; price: number }) => {
+            const token = getToken();
             if (!token) return;
             await listingService.createListing(token, payload);
             await loadListings();
         },
-        [token, loadListings]
+        [loadListings]
     );
 
     // You can add more functions here in the future and return them.

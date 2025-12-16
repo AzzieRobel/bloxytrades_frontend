@@ -2,7 +2,7 @@ import { api } from "./api";
 
 export class AuthService {
     async login(identifier: string, password: string): Promise<AuthResponse> {
-        const res = await api.post<AuthResponse>("/auth/login", { identifier, password });
+        const res = await api.post("/auth/login", { identifier, password });
         return res.data;
     }
 

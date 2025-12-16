@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useModal } from '../contexts/ModalContext';
+import React, { useState, useContext } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { GlobalContext } from '../contexts/context';
 import toast from 'react-hot-toast';
 
 export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
@@ -11,7 +11,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     password: '',
   });
   const { login, googleLogin } = useAuth();
-  const { closeLoginModal, openForgotPasswordModal } = useModal();
+  const { closeLoginModal, openForgotPasswordModal } = useContext(GlobalContext);
 
   if (!isOpen) return null;
 
@@ -26,11 +26,10 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
         setFormData({ emailOrUsername: '', password: '' });
         closeLoginModal();
         onClose();
-      } else {
-        toast.error(result.message || 'Login failed. Please try again.');
       }
+      // Error toast is already shown in the hook
     } catch (error) {
-      toast.error('An unexpected error occurred. Please try again.');
+      // Error toast is already shown in the hook
     } finally {
       setIsSubmitting(false);
     }

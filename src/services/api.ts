@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+import { config } from "@/config";
 
-export const api = axios.create({
-  baseURL: API_BASE,
-});
+const { apiBaseUrl } = config;
+
+export const api = axios.create({ baseURL: apiBaseUrl });

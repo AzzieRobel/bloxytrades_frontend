@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useModal } from '../contexts/ModalContext';
+import { useAuth } from '../hooks/useAuth';
+import { GlobalContext } from '../contexts/context';
 import toast from 'react-hot-toast';
 
 export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
@@ -15,7 +15,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     agreeToTerms: false,
   });
   const { register, googleLogin } = useAuth();
-  const { closeRegisterModal } = useModal();
+  const { closeRegisterModal } = useContext(GlobalContext);
 
   if (!isOpen) return null;
 
@@ -47,11 +47,10 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
         });
         closeRegisterModal();
         onClose();
-      } else {
-        toast.error(result.message || 'Registration failed. Please try again.');
       }
+      // Error toast is already shown in the hook
     } catch (error) {
-      toast.error('An unexpected error occurred. Please try again.');
+      // Error toast is already shown in the hook
     } finally {
       setIsSubmitting(false);
     }
