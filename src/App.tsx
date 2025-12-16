@@ -9,6 +9,7 @@ import ProfilePage from './pages/profile';
 import AffiliatePage from './pages/affiliate';
 import ClaimsPage from './pages/claims';
 import ContactPage from './pages/contact';
+import { RequireAuth } from './components/RequireAuth';
 
 function App() {
   return (
@@ -16,12 +17,54 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<MainLayout />}>
-            <Route path='/market' element={<Market />} />
-            <Route path='/seller-dashboard' element={<SellerDashboard />} />
-            <Route path='/profile' element={<ProfilePage />} />
-            <Route path='/affiliate' element={<AffiliatePage />} />
-            <Route path='/claims' element={<ClaimsPage />} />
-            <Route path='/contact' element={<ContactPage />} />
+            <Route
+              path="/market"
+              element={
+                <RequireAuth>
+                  <Market />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/seller-dashboard"
+              element={
+                <RequireAuth>
+                  <SellerDashboard />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <RequireAuth>
+                  <ProfilePage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/affiliate"
+              element={
+                <RequireAuth>
+                  <AffiliatePage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/claims"
+              element={
+                <RequireAuth>
+                  <ClaimsPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <RequireAuth>
+                  <ContactPage />
+                </RequireAuth>
+              }
+            />
             <Route index element={<HomePage />} />
           </Route>
         </Routes>

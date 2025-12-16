@@ -6,11 +6,13 @@ export interface User {
   username: string;
   email: string;
   createdAt: string;
+  banned?: boolean;
   referralCode?: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (emailOrUsername: string, password: string) => Promise<{ success: boolean; message?: string }>;
@@ -23,77 +25,63 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'bloxytrade_auth';
-const USERS_STORAGE_KEY = 'bloxytrade_users';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
-// Mock delay function to simulate API calls
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Get users from localStorage
-const getStoredUsers = (): User[] => {
-  try {
-    const stored = localStorage.getItem(USERS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
-
-// Save users to localStorage
-const saveUsers = (users: User[]) => {
-  try {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-  } catch (error) {
-    console.error('Failed to save users:', error);
-  }
-};
+interface AuthStorage {
+  user: User;
+  token: string;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Load auth state from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const userData = JSON.parse(stored);
-        setUser(userData);
+        const parsed: AuthStorage = JSON.parse(stored);
+        setUser(parsed.user);
+        setToken(parsed.token);
       }
     } catch (error) {
-      console.error('Failed to load user from localStorage:', error);
+      console.error('Failed to load auth from localStorage:', error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  const persistAuth = (nextUser: User, nextToken: string) => {
+    const payload: AuthStorage = { user: nextUser, token: nextToken };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    setUser(nextUser);
+    setToken(nextToken);
+  };
+
   const login = async (emailOrUsername: string, password: string) => {
     try {
       setIsLoading(true);
-      await delay(800); // Simulate API delay
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: emailOrUsername, password }),
+      });
 
-      const users = getStoredUsers();
-      
-      // Find user by email or username
-      const foundUser = users.find(
-        (u) => u.email.toLowerCase() === emailOrUsername.toLowerCase() || 
-               u.username.toLowerCase() === emailOrUsername.toLowerCase()
-      );
-
-      if (!foundUser) {
-        return { success: false, message: 'User not found. Please check your credentials.' };
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const message = data?.message || 'Login failed. Please check your credentials.';
+        return { success: false, message };
       }
 
-      // In a real app, you'd verify the password hash
-      // For mock purposes, we'll check if password exists (any password works for demo)
-      if (!password || password.length < 3) {
-        return { success: false, message: 'Invalid password.' };
+      const { token: jwt, user: userData } = data as { token: string; user: User };
+      if (!jwt || !userData) {
+        return { success: false, message: 'Invalid response from server.' };
       }
 
-      // Save user to localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(foundUser));
-      setUser(foundUser);
-
-      toast.success(`Welcome back, ${foundUser.username}!`);
+      persistAuth(userData, jwt);
+      toast.success(`Welcome back, ${userData.username || userData.email}!`);
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
@@ -103,46 +91,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string, referralCode?: string) => {
+  const register = async (username: string, email: string, password: string, _referralCode?: string) => {
     try {
       setIsLoading(true);
-      await delay(1000); // Simulate API delay
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-      const users = getStoredUsers();
-
-      // Check if username already exists
-      if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-        return { success: false, message: 'Username already exists. Please choose another one.' };
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const message = data?.message || 'Registration failed. Please try again.';
+        return { success: false, message };
       }
 
-      // Check if email already exists
-      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-        return { success: false, message: 'Email already registered. Please use a different email.' };
+      const { token: jwt, user: userData } = data as { token: string; user: User };
+      if (!jwt || !userData) {
+        return { success: false, message: 'Invalid response from server.' };
       }
 
-      // Validate password
-      if (!password || password.length < 6) {
-        return { success: false, message: 'Password must be at least 6 characters long.' };
-      }
-
-      // Create new user
-      const newUser: User = {
-        id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        username,
-        email: email.toLowerCase(),
-        createdAt: new Date().toISOString(),
-        referralCode: referralCode || undefined,
-      };
-
-      // Add user to storage
-      users.push(newUser);
-      saveUsers(users);
-
-      // Auto-login after registration
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
-      setUser(newUser);
-
-      toast.success(`Account created successfully! Welcome, ${username}!`);
+      persistAuth(userData, jwt);
+      toast.success(`Account created successfully! Welcome, ${userData.username || userData.email}!`);
       return { success: true };
     } catch (error) {
       console.error('Registration error:', error);
@@ -155,61 +125,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
+    setToken(null);
     toast.success('Logged out successfully!');
   };
 
-  const requestPasswordReset = async (emailOrUsername: string) => {
-    try {
-      setIsLoading(true);
-      await delay(800);
-
-      const users = getStoredUsers();
-      const foundUser = users.find(
-        (u) => u.email.toLowerCase() === emailOrUsername.toLowerCase() ||
-               u.username.toLowerCase() === emailOrUsername.toLowerCase()
-      );
-
-      if (!foundUser) {
-        return { success: false, message: 'User not found. Please check the email or username.' };
-      }
-
-      toast.success('Password reset link sent (mock). Check your email.');
-      return { success: true };
-    } catch (error) {
-      console.error('Password reset error:', error);
-      return { success: false, message: 'Unable to process reset. Please try again.' };
-    } finally {
-      setIsLoading(false);
-    }
+  // Still a mock for now; you can wire to backend when ready.
+  const requestPasswordReset = async (_emailOrUsername: string) => {
+    toast.success('Password reset link sent (mock). Check your email.');
+    return { success: true };
   };
 
   const googleLogin = async () => {
     try {
-      setIsLoading(true);
-      await delay(1000); // Simulate API delay
-
-      // Mock Google user
-      const googleUser: User = {
-        id: `google_${Date.now()}`,
-        username: 'google_user',
-        email: 'user@gmail.com',
-        createdAt: new Date().toISOString(),
-      };
-
-      // Check if user exists, if not create one
-      const users = getStoredUsers();
-      const existingUser = users.find(u => u.email === googleUser.email);
-      
-      if (!existingUser) {
-        users.push(googleUser);
-        saveUsers(users);
+      if (!(window as any).google || !(window as any).google.accounts || !(window as any).google.accounts.id) {
+        toast.error('Google SDK not loaded. Please check your configuration.');
+        return;
       }
 
-      const userToLogin = existingUser || googleUser;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(userToLogin));
-      setUser(userToLogin);
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        toast.error('Google client ID is not configured.');
+        return;
+      }
 
-      toast.success(`Welcome, ${userToLogin.username}!`);
+      setIsLoading(true);
+
+      await new Promise<void>((resolve, reject) => {
+        try {
+          (window as any).google.accounts.id.initialize({
+            client_id: clientId,
+            callback: async (response: { credential: string }) => {
+              try {
+                const res = await fetch(`${API_BASE}/auth/google`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ idToken: response.credential }),
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                  const message = data?.message || 'Google login failed.';
+                  toast.error(message);
+                  reject(new Error(message));
+                  return;
+                }
+
+                const { token: jwt, user: userData } = data as { token: string; user: User };
+                persistAuth(userData, jwt);
+                toast.success(`Welcome, ${userData.username || userData.email}!`);
+                resolve();
+              } catch (err) {
+                console.error('Google login callback error:', err);
+                toast.error('An error occurred during Google login.');
+                reject(err);
+              }
+            },
+          });
+
+          (window as any).google.accounts.id.prompt((notification: any) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              // User closed or prompt could not be displayed
+              resolve();
+            }
+          });
+        } catch (err) {
+          reject(err);
+        }
+      });
     } catch (error) {
       console.error('Google login error:', error);
       toast.error('Failed to login with Google. Please try again.');
@@ -222,7 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        token,
+        isAuthenticated: !!user && !!token,
         isLoading,
         login,
         register,

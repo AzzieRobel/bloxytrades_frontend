@@ -53,17 +53,18 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - only show primary nav when authenticated */}
           <div className="hidden lg:flex items-center space-x-12">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className="text-gray-300 hover:text-primary hover:bg-white/5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
-              >
-                {link.name}
-              </Link>
-            ))}
+            {isAuthenticated &&
+              navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className="text-gray-300 hover:text-primary hover:bg-white/5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
+                >
+                  {link.name}
+                </Link>
+              ))}
           </div>
 
           {/* Right Side Actions */}
@@ -115,7 +116,7 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div className={cn("lg:hidden bg-dark-800 border-b border-white/5", isOpen ? "block" : "hidden")}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          {[...navLinks, ...secondaryLinks].map((link) => (
+          {[...(isAuthenticated ? navLinks : []), ...secondaryLinks].map((link) => (
             <Link
               key={link.name}
               to={link.path}
