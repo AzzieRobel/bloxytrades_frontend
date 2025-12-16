@@ -22,3 +22,9 @@ interface Item {
     price: string;
     badge?: any;
 }
+
+interface PurchaseModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    item: Item | null;
+}

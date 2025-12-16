@@ -2,21 +2,6 @@ import React, { useState } from 'react';
 import { X, Check, Search, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-interface Item {
-  id: number;
-  name: string;
-  image: string;
-  rap: string;
-  price: string;
-  badge?: any;
-}
-
-interface PurchaseModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  item: Item | null;
-}
-
 export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
   const [currentStep, setCurrentStep] = useState(2);
   const [username, setUsername] = useState('');
@@ -101,11 +86,10 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
               <React.Fragment key={step.number}>
                 <div className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
-                      currentStep >= step.number
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${currentStep >= step.number
                         ? 'bg-primary text-white'
                         : 'bg-white/10 text-gray-400'
-                    }`}
+                      }`}
                   >
                     {currentStep > step.number ? (
                       <Check className="w-5 h-5" />
@@ -114,18 +98,16 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                     )}
                   </div>
                   <span
-                    className={`text-xs mt-2 ${
-                      currentStep >= step.number ? 'text-white' : 'text-gray-500'
-                    }`}
+                    className={`text-xs mt-2 ${currentStep >= step.number ? 'text-white' : 'text-gray-500'
+                      }`}
                   >
                     {step.label}
                   </span>
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 rounded ${
-                      currentStep > step.number ? 'bg-primary' : 'bg-white/10'
-                    }`}
+                    className={`flex-1 h-1 mx-2 rounded ${currentStep > step.number ? 'bg-primary' : 'bg-white/10'
+                      }`}
                   />
                 )}
               </React.Fragment>

@@ -1,23 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-
-interface SellerDashboardStats {
-    todayTransactions: number;
-    todayRevenue: number;
-    totalTransactions: number;
-    totalRevenue: number;
-}
-
-interface SellerOrder {
-    id: string;
-    listingId: string;
-    price: number;
-    fee: number;
-    status: string;
-    createdAt: string;
-}
+import { sellerService } from "../../services";
 
 export const DashboardTab = () => {
     const { token } = useAuth();
@@ -35,16 +18,9 @@ export const DashboardTab = () => {
         const fetchDashboard = async () => {
             try {
                 setIsLoading(true);
-                const res = await fetch(`${API_BASE}/sellers/me/dashboard`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    setStats(data.stats || stats);
-                    setOrders(data.recentOrders || []);
-                }
+                const data = await sellerService.getDashboard(token);
+                setStats(data.stats || stats);
+                setOrders(data.recentOrders || []);
             } catch (err) {
                 console.error("Failed to load seller dashboard:", err);
             } finally {

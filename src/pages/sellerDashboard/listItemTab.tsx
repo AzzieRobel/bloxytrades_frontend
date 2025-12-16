@@ -1,16 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-
-interface SellerListing {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    status: "active" | "inactive" | "sold";
-    createdAt: string;
-}
+import { listingService } from "../../services";
 
 export const ListItemTab = () => {
     const { token } = useAuth();
@@ -28,15 +18,8 @@ export const ListItemTab = () => {
         if (!token) return;
         try {
             setIsLoading(true);
-            const res = await fetch(`${API_BASE}/listings/mine`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setListings(data.listings || []);
-            }
+            const data = await listingService.getMyListings(token);
+            setListings(data.listings || []);
         } catch (err) {
             console.error("Failed to load seller listings:", err);
         } finally {
@@ -59,25 +42,13 @@ export const ListItemTab = () => {
 
         try {
             setIsSubmitting(true);
-            const res = await fetch(`${API_BASE}/listings`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    title: form.title,
-                    description: form.description,
-                    price: priceNumber,
-                }),
+            await listingService.createListing(token, {
+                title: form.title,
+                description: form.description,
+                price: priceNumber,
             });
-            if (res.ok) {
-                setForm({ title: "", description: "", price: "" });
-                await fetchListings();
-            } else {
-                const data = await res.json().catch(() => ({}));
-                console.error("Failed to create listing:", data);
-            }
+            setForm({ title: "", description: "", price: "" });
+            await fetchListings();
         } catch (err) {
             console.error("Failed to create listing:", err);
         } finally {

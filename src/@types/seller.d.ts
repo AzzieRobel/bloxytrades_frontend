@@ -35,3 +35,38 @@ interface MarketSidebarProps {
     activeTab: TabType;
     setActiveTab: (value: TabType) => void
 }
+
+interface SellerDashboardStats {
+    todayTransactions: number;
+    todayRevenue: number;
+    totalTransactions: number;
+    totalRevenue: number;
+}
+
+interface SellerOrder {
+    id: string;
+    listingId: string;
+    price: number;
+    fee: number;
+    status: string;
+    createdAt: string;
+}
+
+interface SellerSale {
+    id: string;
+    buyerId: string;
+    listingId: string;
+    price: number;
+    fee: number;
+    status: string;
+    createdAt: string;
+}
+
+interface SellerListing {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    status: "active" | "inactive" | "sold";
+    createdAt: string;
+}

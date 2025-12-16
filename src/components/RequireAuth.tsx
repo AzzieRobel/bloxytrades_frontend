@@ -1,11 +1,7 @@
-import React, { ReactElement, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
-
-interface RequireAuthProps {
-  children: ReactElement;
-}
 
 export function RequireAuth({ children }: RequireAuthProps) {
   const { isAuthenticated, isLoading } = useAuth();

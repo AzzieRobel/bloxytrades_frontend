@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-
-interface SellerSale {
-    id: string;
-    buyerId: string;
-    listingId: string;
-    price: number;
-    fee: number;
-    status: string;
-    createdAt: string;
-}
+import { sellerService } from "../../services";
 
 export const SalesHistoryTab = () => {
 
@@ -25,15 +14,8 @@ export const SalesHistoryTab = () => {
         const fetchSales = async () => {
             try {
                 setIsLoading(true);
-                const res = await fetch(`${API_BASE}/sellers/me/sales`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    setSales(data.orders || []);
-                }
+                const data = await sellerService.getSales(token);
+                setSales(data.orders || []);
             } catch (err) {
                 console.error("Failed to load seller sales history:", err);
             } finally {

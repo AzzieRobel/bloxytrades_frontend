@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MessageSquare, Send, Phone, MapPin, Clock } from 'lucide-react';
+import { Mail, MessageSquare, Send, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ContactPage() {

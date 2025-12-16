@@ -1,18 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface ModalContextType {
-  openLoginModal: () => void;
-  openRegisterModal: () => void;
-  openForgotPasswordModal: () => void;
-  closeLoginModal: () => void;
-  closeRegisterModal: () => void;
-  closeForgotPasswordModal: () => void;
-  isLoginModalOpen: boolean;
-  isRegisterModalOpen: boolean;
-  isForgotPasswordOpen: boolean;
-  switchToRegister: () => void;
-  switchToLogin: () => void;
-}
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 

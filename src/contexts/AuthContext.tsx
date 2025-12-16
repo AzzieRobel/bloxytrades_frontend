@@ -1,39 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import toast from 'react-hot-toast';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  createdAt: string;
-  banned?: boolean;
-  referralCode?: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (emailOrUsername: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  register: (username: string, email: string, password: string, referralCode?: string) => Promise<{ success: boolean; message?: string }>;
-  logout: () => void;
-  googleLogin: () => Promise<void>;
-  requestPasswordReset: (emailOrUsername: string) => Promise<{ success: boolean; message?: string }>;
-}
+import { authService } from '../services';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'bloxytrade_auth';
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
-
-interface AuthStorage {
-  user: User;
-  token: string;
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -53,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const persistAuth = (nextUser: User, nextToken: string) => {
+  const persistAuth = (nextUser: AuthUser, nextToken: string) => {
     const payload: AuthStorage = { user: nextUser, token: nextToken };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     setUser(nextUser);
@@ -63,23 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (emailOrUsername: string, password: string) => {
     try {
       setIsLoading(true);
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: emailOrUsername, password }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const message = data?.message || 'Login failed. Please check your credentials.';
-        return { success: false, message };
-      }
-
-      const { token: jwt, user: userData } = data as { token: string; user: User };
-      if (!jwt || !userData) {
-        return { success: false, message: 'Invalid response from server.' };
-      }
-
+      const { token: jwt, user: userData } = await authService.login(emailOrUsername, password);
       persistAuth(userData, jwt);
       toast.success(`Welcome back, ${userData.username || userData.email}!`);
       return { success: true };
@@ -94,23 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (username: string, email: string, password: string, _referralCode?: string) => {
     try {
       setIsLoading(true);
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const message = data?.message || 'Registration failed. Please try again.';
-        return { success: false, message };
-      }
-
-      const { token: jwt, user: userData } = data as { token: string; user: User };
-      if (!jwt || !userData) {
-        return { success: false, message: 'Invalid response from server.' };
-      }
-
+      const { token: jwt, user: userData } = await authService.register(username, email, password);
       persistAuth(userData, jwt);
       toast.success(`Account created successfully! Welcome, ${userData.username || userData.email}!`);
       return { success: true };
@@ -156,27 +98,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             client_id: clientId,
             callback: async (response: { credential: string }) => {
               try {
-                const res = await fetch(`${API_BASE}/auth/google`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ idToken: response.credential }),
-                });
-
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                  const message = data?.message || 'Google login failed.';
-                  toast.error(message);
-                  reject(new Error(message));
-                  return;
-                }
-
-                const { token: jwt, user: userData } = data as { token: string; user: User };
+                const { token: jwt, user: userData } = await authService.loginWithGoogle(
+                  response.credential
+                );
                 persistAuth(userData, jwt);
                 toast.success(`Welcome, ${userData.username || userData.email}!`);
                 resolve();
-              } catch (err) {
+              } catch (err: any) {
                 console.error('Google login callback error:', err);
-                toast.error('An error occurred during Google login.');
+                const message =
+                  err?.response?.data?.message || 'An error occurred during Google login.';
+                toast.error(message);
                 reject(err);
               }
             },

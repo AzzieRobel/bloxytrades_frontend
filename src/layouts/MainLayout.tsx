@@ -1,14 +1,13 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { useLocation, Outlet } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+
+import { AuthProvider } from '../contexts/AuthContext';
+import { ModalProvider, useModal } from '../contexts/ModalContext';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
-import { Toaster } from 'react-hot-toast';
-import { ModalProvider, useModal } from '../contexts/ModalContext';
-import { AuthProvider } from '../contexts/AuthContext';
 import { LoginModal } from '../components/loginModal';
 import { RegisterModal } from '../components/registerModal';
 import { ForgotPasswordModal } from '../components/forgotPasswordModal';
-import { useLocation } from 'react-router-dom';
 
 function MainLayoutContent() {
     const {

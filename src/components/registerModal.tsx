@@ -4,12 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import toast from 'react-hot-toast';
 
-interface RegisterModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSwitchToLogin?: () => void;
-}
-
 export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

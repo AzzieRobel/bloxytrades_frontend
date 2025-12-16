@@ -4,12 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useModal } from '../contexts/ModalContext';
 import toast from 'react-hot-toast';
 
-interface ForgotPasswordModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSwitchToLogin?: () => void;
-}
-
 export function ForgotPasswordModal({ isOpen, onClose, onSwitchToLogin }: ForgotPasswordModalProps) {
     const [emailOrUsername, setEmailOrUsername] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,4 +92,3 @@ export function ForgotPasswordModal({ isOpen, onClose, onSwitchToLogin }: Forgot
         </div>
     );
 }
-

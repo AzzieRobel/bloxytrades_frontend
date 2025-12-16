@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Mail, Lock, Globe, DollarSign, X } from 'lucide-react';
+import { Edit, Mail, Lock, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
