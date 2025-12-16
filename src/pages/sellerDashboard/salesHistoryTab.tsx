@@ -1,30 +1,10 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { sellerService } from "../../services";
+import { useState } from "react";
+import { useSeller } from "../../hooks/useSeller";
 
 export const SalesHistoryTab = () => {
 
     const [salesFilter, setSalesFilter] = useState<SalesFilterType>("completed");
-    const { token } = useAuth();
-    const [sales, setSales] = useState<SellerSale[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        if (!token) return;
-        const fetchSales = async () => {
-            try {
-                setIsLoading(true);
-                const data = await sellerService.getSales(token);
-                setSales(data.orders || []);
-            } catch (err) {
-                console.error("Failed to load seller sales history:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchSales();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token]);
+    const { sales, isLoadingSales } = useSeller();
 
     const filteredSales = sales.filter((sale) => {
         if (salesFilter === "completed") return sale.status === "completed";
@@ -46,7 +26,7 @@ export const SalesHistoryTab = () => {
                 <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-sm p-10">
                     <div className="text-gray-400 text-base mb-3 font-medium">Total sold</div>
                     <div className="text-white text-6xl font-bold">
-                        {isLoading
+                        {isLoadingSales
                             ? "$… USD"
                             : `$${filteredSales.reduce((sum, s) => sum + (s.price || 0), 0).toFixed(2)} USD`}
                     </div>
@@ -54,7 +34,7 @@ export const SalesHistoryTab = () => {
                 <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-sm p-10">
                     <div className="text-gray-400 text-base mb-3 font-medium">Total transactions performed</div>
                     <div className="text-white text-6xl font-bold">
-                        {isLoading ? "…" : filteredSales.length}
+                        {isLoadingSales ? "…" : filteredSales.length}
                     </div>
                 </div>
             </div>
@@ -109,12 +89,12 @@ export const SalesHistoryTab = () => {
                             {filteredSales.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="px-8 py-20 text-center text-gray-600">
-                                        {isLoading ? "Loading sales..." : "No sales found."}
+                                        {isLoadingSales ? "Loading sales..." : "No sales found."}
                                     </td>
                                 </tr>
                             ) : (
-                                filteredSales.map((sale) => (
-                                    <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                filteredSales.map((sale, index) => (
+                                    <tr key={sale.id ?? index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                                         <td className="px-8 py-5 text-gray-400">{sale.id}</td>
                                         <td className="px-8 py-5 text-gray-400">{sale.buyerId}</td>
                                         <td className="px-8 py-5 text-gray-400">{sale.listingId}</td>

@@ -1,12 +1,9 @@
-import { FormEvent, useEffect, useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { listingService } from "../../services";
+import { FormEvent, useState } from "react";
+import { useListing } from "../../hooks/useListing";
 
 export const ListItemTab = () => {
-    const { token } = useAuth();
+    const { listings, isLoading, createListing } = useListing();
 
-    const [listings, setListings] = useState<SellerListing[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [form, setForm] = useState({
         title: "",
         description: "",
@@ -14,27 +11,8 @@ export const ListItemTab = () => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fetchListings = async () => {
-        if (!token) return;
-        try {
-            setIsLoading(true);
-            const data = await listingService.getMyListings(token);
-            setListings(data.listings || []);
-        } catch (err) {
-            console.error("Failed to load seller listings:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchListings();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token]);
-
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!token) return;
         const priceNumber = Number(form.price);
         if (!form.title.trim() || !form.description.trim() || !priceNumber || priceNumber <= 0) {
             return;
@@ -42,13 +20,12 @@ export const ListItemTab = () => {
 
         try {
             setIsSubmitting(true);
-            await listingService.createListing(token, {
+            await createListing({
                 title: form.title,
                 description: form.description,
                 price: priceNumber,
             });
             setForm({ title: "", description: "", price: "" });
-            await fetchListings();
         } catch (err) {
             console.error("Failed to create listing:", err);
         } finally {
