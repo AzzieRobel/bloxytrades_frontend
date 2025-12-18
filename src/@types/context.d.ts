@@ -21,10 +21,10 @@ interface InitialState {
 }
 
 interface UserState {
-    id: string,
-    username: string,
-    email: string,
-    banned: boolean,
-    createdAt: string,
+    id: string
+    username: string
+    email: string
+    isBanned: boolean
     referralCode: string
+    createdAt: string
 }

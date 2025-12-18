@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Mail, Lock, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useUser } from '@/hooks/useUser';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { changeUsername, changeEmail, changePassword } = useUser()
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -32,43 +35,60 @@ export default function ProfilePage() {
     });
   };
 
-  const handleSaveName = () => {
-    if (!editedName.trim()) {
-      toast.error('Name cannot be empty');
-      return;
+  const handleSaveName = async () => {
+    try {
+      if (!editedName.trim()) {
+        toast.error('Name cannot be empty');
+        return;
+      }
+      await changeUsername(editedName)
+
+      toast.success('Name updated successfully!');
+      setIsEditingName(false);
+    } catch (error: any) {
+      console.error("Failed to change username:", error);
+      toast.error("Failed to change username. Please try again.");
     }
-    // In a real app, you'd update the user in the backend
-    toast.success('Name updated successfully!');
-    setIsEditingName(false);
   };
 
-  const handleSaveEmail = () => {
-    if (!editedEmail.trim() || !editedEmail.includes('@')) {
-      toast.error('Please enter a valid email');
-      return;
+  const handleSaveEmail = async () => {
+    try {
+      if (!editedEmail.trim() || !editedEmail.includes('@')) {
+        toast.error('Please enter a valid email');
+        return;
+      }
+      await changeEmail(editedEmail)
+      toast.success('Email updated successfully!');
+      setIsEditingEmail(false);
+    } catch (error: any) {
+      console.error("Failed to change email:", error);
+      toast.error("Failed to change email. Please try again.");
     }
-    // In a real app, you'd update the user in the backend
-    toast.success('Email updated successfully!');
-    setIsEditingEmail(false);
   };
 
-  const handleChangePassword = () => {
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      toast.error('Please fill all password fields');
-      return;
+  const handleChangePassword = async () => {
+    try {
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        toast.error('Please fill all password fields');
+        return;
+      }
+      if (passwordData.newPassword.length < 6) {
+        toast.error('Password must be at least 6 characters');
+        return;
+      }
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        toast.error('New passwords do not match');
+        return;
+      }
+
+      await changePassword({ currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword })
+      toast.success("Password changed successfully!");
+      setIsChangingPassword(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      console.error("Failed to change password:", error);
+      toast.error("Failed to change password. Please try again.");
     }
-    if (passwordData.newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('New passwords do not match');
-      return;
-    }
-    // In a real app, you'd verify current password and update
-    toast.success('Password changed successfully!');
-    setIsChangingPassword(false);
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   };
 
   return (

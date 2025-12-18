@@ -10,7 +10,7 @@ const user: UserState = {
     id: "",
     username: "",
     email: "",
-    banned: false,
+    isBanned: false,
     createdAt: "",
     referralCode: "",
 }
@@ -90,7 +90,7 @@ export const GlobalContextProvider = ({ children }: { children: React.ReactNode 
                             id: parsed.user.id,
                             username: parsed.user.username,
                             email: parsed.user.email,
-                            banned: parsed.user.banned || false,
+                            isBanned: parsed.user.banned || false,
                             createdAt: parsed.user.createdAt,
                             referralCode: parsed.user.referralCode || "",
                         }
