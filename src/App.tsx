@@ -9,6 +9,7 @@ import HomePage from './pages/home';
 import Market from './pages/market';
 import SellerDashboard from './pages/sellerDashboard';
 import ProfilePage from './pages/profile';
+import UserProfilePage from './pages/userProfile';
 import AffiliatePage from './pages/affiliate';
 import ClaimsPage from './pages/claims';
 import ContactPage from './pages/contact';
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/market" element={<ProtectedRoute><Market /></ProtectedRoute>} />
                 <Route path="/seller-dashboard" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/shop/:username" element={<UserProfilePage />} />
                 <Route path="/affiliate" element={<ProtectedRoute><AffiliatePage /></ProtectedRoute>} />
                 <Route path="/claims" element={<ProtectedRoute><ClaimsPage /></ProtectedRoute>} />
                 <Route path="/contact" element={<ContactPage />} />
