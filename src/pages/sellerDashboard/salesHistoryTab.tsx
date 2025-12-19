@@ -76,12 +76,12 @@ export const SalesHistoryTab = () => {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-white/10">
-                                <th className="px-8 py-5 text-left text-white font-semibold text-sm">Tracking ID</th>
+                                <th className="px-8 py-5 text-left text-white font-semibold text-sm">Order ID</th>
                                 <th className="px-8 py-5 text-left text-white font-semibold text-sm">Buyer ID</th>
-                                <th className="px-8 py-5 text-left text-white font-semibold text-sm">Item</th>
+                                <th className="px-8 py-5 text-left text-white font-semibold text-sm">Listing ID</th>
                                 <th className="px-8 py-5 text-left text-white font-semibold text-sm">Price</th>
                                 <th className="px-8 py-5 text-left text-white font-semibold text-sm">Fee</th>
-                                <th className="px-8 py-5 text-left text-white font-semibold text-sm">IP</th>
+                                <th className="px-8 py-5 text-left text-white font-semibold text-sm">Status</th>
                                 <th className="px-8 py-5 text-left text-white font-semibold text-sm">Date</th>
                             </tr>
                         </thead>
@@ -100,7 +100,7 @@ export const SalesHistoryTab = () => {
                                         <td className="px-8 py-5 text-gray-400">{sale.listingId}</td>
                                         <td className="px-8 py-5 text-gray-400">${sale.price.toFixed(2)}</td>
                                         <td className="px-8 py-5 text-gray-400">${sale.fee.toFixed(2)}</td>
-                                        <td className="px-8 py-5 text-gray-400">{sale.status}</td>
+                                        <td className="px-8 py-5 text-gray-400 capitalize">{sale.status}</td>
                                         <td className="px-8 py-5 text-gray-400">
                                             {new Date(sale.createdAt).toLocaleString()}
                                         </td>

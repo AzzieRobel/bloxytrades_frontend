@@ -20,7 +20,7 @@ interface Item {
     image: string;
     rap: string;
     price: string;
-    badge?: any;
+    badges?: any;
 }
 
 interface PurchaseModalProps {

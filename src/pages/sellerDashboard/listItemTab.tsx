@@ -21,9 +21,13 @@ export const ListItemTab = () => {
         try {
             setIsSubmitting(true);
             await createListing({
-                title: form.title,
+                itemName: form.title,
                 description: form.description,
-                price: priceNumber,
+                quantity: 1, // Default quantity
+                price: { USD: priceNumber }, // Price as object with USD
+                acceptedPayments: { stripe: true, paypal: true, crypto: true }, // Default payment methods
+                estimatedDeliveryTime: 24, // Default 24 hours
+                isActive: true,
             });
             setForm({ title: "", description: "", price: "" });
         } catch (err) {
@@ -107,16 +111,22 @@ export const ListItemTab = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                listings.map((listing) => (
-                                    <tr key={listing.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 text-gray-200">{listing.title}</td>
-                                        <td className="px-6 py-4 text-gray-200">${listing.price.toFixed(2)}</td>
-                                        <td className="px-6 py-4 text-gray-400 capitalize">{listing.status}</td>
-                                        <td className="px-6 py-4 text-gray-400">
-                                            {new Date(listing.createdAt).toLocaleString()}
-                                        </td>
-                                    </tr>
-                                ))
+                                listings.map((listing) => {
+                                    // Extract price from price object (assuming USD)
+                                    const priceValue = listing.price?.USD || listing.price?.usd || 0;
+                                    return (
+                                        <tr key={listing.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 text-gray-200">{listing.itemName}</td>
+                                            <td className="px-6 py-4 text-gray-200">${typeof priceValue === 'number' ? priceValue.toFixed(2) : '0.00'}</td>
+                                            <td className="px-6 py-4 text-gray-400 capitalize">
+                                                {listing.isActive ? 'Active' : 'Inactive'}
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-400">
+                                                {listing.createdAt ? new Date(listing.createdAt).toLocaleString() : 'N/A'}
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

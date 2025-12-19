@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Sidebar } from "./sidebar";
 import { DashboardTab } from "./dashboardTab";
@@ -13,7 +13,7 @@ import { useUser } from "@/hooks/useUser";
 export default function SellerDashboard() {
     const [activeTab, setActiveTab] = useState<TabType>("dashboard");
     const { profile, isLoadingProfile } = useSeller();
-    const { user } = useUser();
+    const { user, isLoading: isLoadingUser } = useUser();
 
     // Check if onboarding is needed
     const isPaymentConnected = profile?.payoutMethod && (
@@ -26,33 +26,30 @@ export default function SellerDashboard() {
         ))
     );
     const isRobloxConnected = !!(user?.robloxUserId && user?.robloxUsername);
-    const needsOnboarding = !profile?.isEnabled || !isPaymentConnected || !isRobloxConnected;
+    
+    // If profile doesn't exist yet, show onboarding
+    // If profile exists but is not enabled, or payment/roblox not connected, show onboarding
+    const needsOnboarding = !profile || !profile.isEnabled || !isPaymentConnected || !isRobloxConnected;
 
-    // If seller is not enabled and onboarding is complete, show onboarding
-    if (!profile.isEnabled && (profile.payoutMethod.paypalEmail === ""||profile.payoutMethod.paypalEmail)) {
+    // Show loading state while profile or user is being fetched
+    if (isLoadingProfile || isLoadingUser) {
         return (
-            <div className="min-h-screen pt-20 bg-black relative overflow-hidden">
+            <div className="min-h-screen pt-20 bg-black relative overflow-hidden flex items-center justify-center">
+                <div className="text-white text-lg">Loading...</div>
+            </div>
+        );
+    }
+
+    // Show onboarding if user needs to complete setup (payment or roblox not connected, or seller not enabled)
+    if (needsOnboarding) {
+        return (
+            <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
                 {/* Background gradient effects */}
                 <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-[#5650EF]/5 rounded-full blur-[200px]" />
                 <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-[#5650EF]/5 rounded-full blur-[200px]" />
 
-                <div className="max-w-[1600px] mx-auto px-12 relative z-10">
-                    <div className="flex gap-12">
-                        {/* Sidebar - Hidden during onboarding */}
-                        <aside className="w-72 flex-shrink-0">
-                            <h1 className="text-4xl font-bold text-white mb-6 tracking-wide">SELLER'S PANEL</h1>
-                            <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-sm p-6">
-                                <p className="text-gray-400 text-sm">
-                                    Complete the onboarding process to access the seller dashboard.
-                                </p>
-                            </div>
-                        </aside>
-
-                        {/* Main Content */}
-                        <main className="flex-1 pt-16">
-                            <OnboardingTab />
-                        </main>
-                    </div>
+                <div className="max-w-4xl mx-auto px-6 py-12 relative z-10 w-full">
+                    <OnboardingTab />
                 </div>
             </div>
         );

@@ -6,7 +6,7 @@ import { useUser } from "@/hooks/useUser";
 
 export const OnboardingTab = () => {
     const { profile, reloadProfile, updateProfile } = useSeller();
-    const { user, connectRoblox } = useUser();
+    const { user, connectRoblox, reloadUser } = useUser();
     const [isConnectingRoblox, setIsConnectingRoblox] = useState(false);
     const [isConnectingPayment, setIsConnectingPayment] = useState(false);
     const [robloxUsername, setRobloxUsername] = useState("");
@@ -44,6 +44,8 @@ export const OnboardingTab = () => {
                 robloxUsername: robloxUsername.trim(),
                 robloxUserId: robloxUserId.trim(),
             });
+            // Reload user data to ensure it's up to date
+            await reloadUser();
             toast.success("Roblox account connected successfully!");
             setRobloxUsername("");
             setRobloxUserId("");
@@ -123,8 +125,7 @@ export const OnboardingTab = () => {
             await updateProfile({ isEnabled: true });
             toast.success("Seller account enabled! You can now start selling.");
             await reloadProfile();
-            // Reload page to show dashboard
-            window.location.reload();
+            // Component will automatically re-render and show dashboard
         } catch (error: any) {
             console.error("Failed to enable seller account:", error);
             toast.error(error?.response?.data?.message || "Failed to enable seller account");

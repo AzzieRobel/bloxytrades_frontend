@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, ToggleLeft, ToggleRight, Star } from 'lucide-react';
 
 import { config } from '../../config'
 import { PurchaseModal } from '../../components/PurchaseModal';
+import { useListing } from '../../hooks/useListing';
+import { BankCard, Bitcoin, Paypal } from '../../icons/market.icons';
 
 const categories = [
     { name: "LIMITEDS", image: config.limited },
@@ -19,6 +21,45 @@ export const MainContent = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+    const { listings, isLoading, getAllListing } = useListing();
+
+    // Fetch listings on mount
+    useEffect(() => {
+        void getAllListing();
+    }, []);
+
+    // Transform listings to items format for display
+    const items = listings.map((listing: any, index: number) => {
+        const priceValue = listing.price?.USD || listing.price?.usd || 0;
+        const priceString = typeof priceValue === 'number' ? `$${priceValue.toFixed(0)}` : '$0';
+
+        // Build badges array based on accepted payments
+        const badges: React.ReactNode[] = [];
+        if (listing.acceptedPayments?.crypto) {
+            badges.push(<Bitcoin key="crypto" />);
+        }
+        if (listing.acceptedPayments?.paypal) {
+            badges.push(<Paypal key="paypal" />);
+        }
+        if (listing.acceptedPayments?.stripe) {
+            badges.push(<BankCard key="bank" />);
+        }
+
+        return {
+            id: listing.id || index + 1,
+            name: listing.itemName || 'Unnamed Item',
+            image: "https://adurite.com/_next/image?url=https%3A%2F%2Fimages.adurite.com%2Fimages%3FassetId%3D77443491%26width%3D420%26height%3D420%26format%3DPng&w=128&q=75",
+            rap: "180K", // Default RAP value (can be added to listing model later)
+            price: priceString,
+            badges,
+            listingData: listing, // Store full listing data for purchase modal
+        };
+    });
+
+    // Filter items based on search query
+    const filteredItems = items.filter((item: Item) => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <main className="flex-1">
@@ -88,61 +129,73 @@ export const MainContent = () => {
 
             {/* Items Grid */}
             <div className={`grid gap-4 ${minimizedView ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"}`}>
-                {config.itemMockUpConfig.map((item) => (
-                    <div
-                        key={item.id}
-                        onClick={() => {
-                            setSelectedItem(item);
-                            setIsPurchaseModalOpen(true);
-                        }}
-                        className="bg-[#0f0d16] border border-white/10 rounded-sm overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
-                    >
-                        <div className={`relative ${minimizedView ? "aspect-square" : "aspect-square"}`}>
-                            {item.badge && (
-                                <span className='absolute top-2 right-2 px-2 py-1 flex z-10'>
-                                    {item.badge.crypto()}
-                                    {item.badge.paypal()}
-                                    {item.badge.bank()}
-                                </span>
-                            )}
-                            <img
-                                src={item.image}
-                                alt={item.name}
-                                className={`w-full object-contain ${minimizedView ? "p-4" : "p-8"}`}
-                            />
-                        </div>
-                        {!minimizedView && (
-                            <div className="p-3 bg-primary/10 border-t border-t-white/10">
-                                <h3 className="font-semibold text-white mb-2.5 truncate">{item.name}</h3>
-                                <div className="flex items-center justify-around text-md">
-                                    <div className='leading-[100%]'>
-                                        <div className="text-primary text-xs">RAP</div>
-                                        <div className="text-base">{item.rap}</div>
-                                    </div>
-                                    <div className='leading-[100%]'>
-                                        <div className="text-primary text-xs">Price</div>
-                                        <div className="text-base">{item.price}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {minimizedView && (
-                            <div className="p-2 bg-primary/10 border-t border-t-white/10">
-                                <h3 className="font-semibold text-white text-xs mb-1 truncate">{item.name}</h3>
-                                <div className="flex items-center justify-between text-xs">
-                                    <div>
-                                        <span className="text-primary">RAP: </span>
-                                        <span className="text-white">{item.rap}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-primary">Price: </span>
-                                        <span className="text-white">{item.price}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                {isLoading ? (
+                    <div className="col-span-full text-center text-gray-400 py-12">
+                        Loading listings...
                     </div>
-                ))}
+                ) : filteredItems.length === 0 ? (
+                    <div className="col-span-full text-center text-gray-400 py-12">
+                        {searchQuery ? 'No listings match your search.' : 'No listings found.'}
+                    </div>
+                ) : (
+                    filteredItems.map((item: Item) => (
+                        <div
+                            key={item.id}
+                            onClick={() => {
+                                setSelectedItem(item);
+                                setIsPurchaseModalOpen(true);
+                            }}
+                            className="bg-[#0f0d16] border border-white/10 rounded-sm overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
+                        >
+                            <div className={`relative ${minimizedView ? "aspect-square" : "aspect-square"}`}>
+                                {item.badges && item.badges.length > 0 && (
+                                    <span className='absolute top-2 right-2 px-2 py-1 flex gap-1 z-10'>
+                                        {item.badges.map((badge: React.ReactNode, idx: number) => (
+                                            <span key={idx} className="flex items-center">
+                                                {badge}
+                                            </span>
+                                        ))}
+                                    </span>
+                                )}
+                                <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className={`w-full object-contain ${minimizedView ? "p-4" : "p-8"}`}
+                                />
+                            </div>
+                            {!minimizedView && (
+                                <div className="p-3 bg-primary/10 border-t border-t-white/10">
+                                    <h3 className="font-semibold text-white mb-2.5 truncate">{item.name}</h3>
+                                    <div className="flex items-center justify-around text-md">
+                                        <div className='leading-[100%]'>
+                                            <div className="text-primary text-xs">RAP</div>
+                                            <div className="text-base">{item.rap}</div>
+                                        </div>
+                                        <div className='leading-[100%]'>
+                                            <div className="text-primary text-xs">Price</div>
+                                            <div className="text-base">{item.price}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {minimizedView && (
+                                <div className="p-2 bg-primary/10 border-t border-t-white/10">
+                                    <h3 className="font-semibold text-white text-xs mb-1 truncate">{item.name}</h3>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div>
+                                            <span className="text-primary">RAP: </span>
+                                            <span className="text-white">{item.rap}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-primary">Price: </span>
+                                            <span className="text-white">{item.price}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Purchase Modal */}

@@ -15,18 +15,6 @@ const user: UserState = {
     createdAt: "",
 };
 
-const listing: Listing = {
-    id: "",
-    sellerId: "",
-    itemName: "",
-    description: "",
-    quantity: 0,
-    price: {},
-    acceptedPayments: {},
-    estimatedDeliveryTime: 0,
-    isActive: false,
-};
-
 const sellerProfile: SellerProfile = {
     userId: "",
     isEnabled: false,
@@ -40,7 +28,7 @@ const sellerProfile: SellerProfile = {
 
 const initialState: InitialState = {
     user,
-    listing,
+    listings: [],
     sellerProfile,
 }
 

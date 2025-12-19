@@ -1,10 +1,33 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { GlobalContext } from "@/contexts/context";
 import { userService } from "@/services";
+import { getToken } from "@/utils/auth";
 
 export function useUser() {
     const { state, update } = useContext(GlobalContext)
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const loadUser = async () => {
+        const token = getToken();
+        if (!token) {
+            setIsLoading(false);
+            return;
+        }
+        try {
+            setIsLoading(true);
+            const data = await userService.getProfile();
+            update({ user: data.user });
+        } catch (err) {
+            console.error("Failed to load user profile:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        void loadUser();
+    }, []);
 
     const getUser = () => {
         return state.user;
@@ -38,5 +61,14 @@ export function useUser() {
         } catch (error: any) { throw error }
     }
 
-    return { user: state.user, getUser, changeEmail, changeUsername, changePassword, connectRoblox };
+    return { 
+        user: state.user, 
+        isLoading,
+        getUser, 
+        changeEmail, 
+        changeUsername, 
+        changePassword, 
+        connectRoblox,
+        reloadUser: loadUser
+    };
 }

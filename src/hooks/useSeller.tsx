@@ -11,6 +11,29 @@ export function useSeller() {
     const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
     const [isLoadingDashboard, setIsLoadingDashboard] = useState<boolean>(true);
     const [isLoadingSales, setIsLoadingSales] = useState<boolean>(true);
+    const [stats, setStats] = useState({
+        todayTransactions: 0,
+        todayRevenue: 0,
+        totalTransactions: 0,
+        totalRevenue: 0,
+    });
+    const [orders, setOrders] = useState<Array<{
+        id: string;
+        listingId: string;
+        price: number;
+        fee: number;
+        status: string;
+        createdAt: string;
+    }>>([]);
+    const [sales, setSales] = useState<Array<{
+        id: string;
+        buyerId: string;
+        listingId: string;
+        price: number;
+        fee: number;
+        status: string;
+        createdAt: string;
+    }>>([]);
 
     const loadProfile = async () => {
         const token = getToken();
@@ -45,8 +68,13 @@ export function useSeller() {
         try {
             setIsLoadingDashboard(true);
             const data = await sellerService.getDashboard();
-            // setStats(data.stats || stats);
-            // setOrders(data.recentOrders || []);
+            setStats(data.stats || {
+                todayTransactions: 0,
+                todayRevenue: 0,
+                totalTransactions: 0,
+                totalRevenue: 0,
+            });
+            setOrders(data.recentOrders || []);
         } catch (err) {
             console.error("Failed to load seller dashboard:", err);
         } finally {
@@ -60,7 +88,7 @@ export function useSeller() {
         try {
             setIsLoadingSales(true);
             const data = await sellerService.getSales();
-            // setSales(data.orders || []);
+            setSales(data.orders || []);
         } catch (err) {
             console.error("Failed to load seller sales history:", err);
         } finally {
@@ -70,14 +98,23 @@ export function useSeller() {
 
     useEffect(() => {
         const token = getToken();
-        if (!token) return;
+        if (!token) {
+            setIsLoadingProfile(false);
+            setIsLoadingDashboard(false);
+            setIsLoadingSales(false);
+            return;
+        }
         void loadProfile();
         void loadDashboard();
         void loadSales();
-    }, [loadProfile, loadDashboard, loadSales]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return {
         profile: sellerProfile,
+        stats,
+        orders,
+        sales,
         isLoadingProfile,
         isLoadingDashboard,
         isLoadingSales,

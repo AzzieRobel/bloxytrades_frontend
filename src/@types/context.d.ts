@@ -7,7 +7,7 @@ interface GlobalContextType {
 
 interface InitialState {
     user: UserState | null;
-    listing: Listing | null;
+    listings: Listing[];
     sellerProfile: SellerProfile | null
 }
 
