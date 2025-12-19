@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Search, ToggleLeft, ToggleRight, Star } from 'lucide-react';
 
 import { config } from '../../config'
@@ -16,23 +16,70 @@ const categories = [
     { name: "Adopt Me", image: config.adopt_me }
 ];
 
-export const MainContent = () => {
+interface MainContentProps {
+  filterOption: FilterOption;
+}
+
+type ListingFilters = {
+  priceMin?: number;
+  priceMax?: number;
+  paymentRobux?: boolean;
+  paymentPaypal?: boolean;
+  paymentCard?: boolean;
+};
+
+export const MainContent = ({ filterOption }: MainContentProps) => {
     const [minimizedView, setMinimizedView] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const { listings, isLoading, hasMore, loadInitialListings, loadMoreListings } = useListing();
 
-    // Fetch listings on mount (newest first)
+    // Build server-side filters from applied filterOption
+    const serverFilters: ListingFilters = useMemo(() => {
+        const parsePrice = (val: string | undefined): number | undefined => {
+            if (!val) return undefined;
+            const n = parseFloat(val.replace("$", "").trim());
+            return isNaN(n) ? undefined : n;
+        };
+
+        const priceMin = parsePrice(filterOption.priceMin);
+        const priceMax = parsePrice(filterOption.priceMax);
+
+        const { paymentMethod } = filterOption;
+
+        return {
+            priceMin,
+            priceMax,
+            paymentRobux: paymentMethod.robux || undefined,
+            paymentPaypal: paymentMethod.paypal || undefined,
+            paymentCard: paymentMethod.card || undefined,
+        };
+    }, [filterOption]);
+
+    // Decide sort for backend: support price-high/price-low; others -> newest
+    const backendSort: "newest" | "price-high" | "price-low" = useMemo(() => {
+        if (filterOption.sortOption === "price-high") return "price-high";
+        if (filterOption.sortOption === "price-low") return "price-low";
+        return "newest";
+    }, [filterOption.sortOption]);
+
+    // Fetch listings whenever applied filters or backend sort change
     useEffect(() => {
-        void loadInitialListings("newest");
+        void loadInitialListings(backendSort, serverFilters);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [backendSort, JSON.stringify(serverFilters)]);
 
     // Transform listings to items format for display
-    const items = listings.map((listing: any, index: number) => {
-        const priceValue = listing.price?.USD || listing.price?.usd || 0;
-        const priceString = typeof priceValue === 'number' ? `$${priceValue.toFixed(0)}` : '$0';
+    const items: Item[] = listings.map((listing: any, index: number) => {
+        const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
+        const priceNumeric =
+            typeof priceValueRaw === "number"
+                ? priceValueRaw
+                : parseFloat(priceValueRaw) || 0;
+
+        const priceString =
+            typeof priceNumeric === "number" ? `$${priceNumeric.toFixed(0)}` : "$0";
 
         // Build badges array based on accepted payments
         const badges: React.ReactNode[] = [];
@@ -53,14 +100,39 @@ export const MainContent = () => {
             rap: "180K", // Default RAP value (can be added to listing model later)
             price: priceString,
             badges,
-            listingData: listing, // Store full listing data for purchase modal
+            priceNumeric,
+            listingData: listing,
         };
     });
 
-    // Filter items based on search query
-    const filteredItems = items.filter((item: Item) => 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Helper to parse RAP like "180K" to a number (placeholder until RAP is real)
+    const parseRap = (rap: string): number => {
+        if (!rap) return 0;
+        const upper = rap.toUpperCase().trim();
+        const hasK = upper.endsWith("K");
+        const numeric = parseFloat(upper.replace(/[^0-9.]/g, "")) || 0;
+        return hasK ? numeric * 1000 : numeric;
+    };
+
+    // Compute final filtered + sorted items (search + RAP / fallback sorting).
+    const filteredItems = items
+        .filter((item: Item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a: Item, b: Item) => {
+            const sort = filterOption.sortOption;
+
+            // RAP-based sorts (placeholder until RAP is real on listings)
+            if (sort === "rap-high" || sort === "rap-low") {
+                const ra = parseRap(a.rap);
+                const rb = parseRap(b.rap);
+                if (sort === "rap-high") return rb - ra;
+                return ra - rb;
+            }
+
+            // Default: keep API order (newest first)
+            return 0;
+        });
 
     return (
         <main className="flex-1">

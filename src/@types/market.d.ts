@@ -12,6 +12,8 @@ interface FilterOption {
 interface SidebarProps {
     filterOption: FilterOption;
     setFilterOption: (value: FilterOption) => void;
+    onApply: () => void;
+    onClear: () => void;
 }
 
 interface Item {
@@ -21,6 +23,8 @@ interface Item {
     rap: string;
     price: string;
     badges?: any;
+    priceNumeric?: number;
+    listingData?: any;
 }
 
 interface PurchaseModalProps {

@@ -7,10 +7,15 @@ interface ListingCursor {
 }
 
 interface GetAllListingParams {
-  sort?: "newest";
+  sort?: "newest" | "price-high" | "price-low";
   limit?: number;
   cursorCreatedAt?: string;
   cursorId?: string;
+  priceMin?: number;
+  priceMax?: number;
+  paymentRobux?: boolean;
+  paymentPaypal?: boolean;
+  paymentCard?: boolean;
 }
 
 interface GetAllListingResponse {
@@ -21,7 +26,17 @@ interface GetAllListingResponse {
 
 export class ListingService {
   async getAllListing(params: GetAllListingParams = {}) {
-    const { sort = "newest", limit = 24, cursorCreatedAt, cursorId } = params;
+    const {
+      sort = "newest",
+      limit = 24,
+      cursorCreatedAt,
+      cursorId,
+      priceMin,
+      priceMax,
+      paymentRobux,
+      paymentPaypal,
+      paymentCard,
+    } = params;
 
     const res = await api.get("/listings", {
       params: {
@@ -29,6 +44,11 @@ export class ListingService {
         limit,
         cursorCreatedAt,
         cursorId,
+        priceMin,
+        priceMax,
+        paymentRobux,
+        paymentPaypal,
+        paymentCard,
       },
     });
 

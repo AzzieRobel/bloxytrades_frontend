@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { Check } from '../../icons/market.icons'
 
 export const Sidebar = (props: SidebarProps) => {
-    const { filterOption, setFilterOption } = props
+    const { filterOption, setFilterOption, onApply, onClear } = props
     const minInputRef = useRef<HTMLInputElement>(null);
     const maxInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,16 +65,7 @@ export const Sidebar = (props: SidebarProps) => {
     const highlightWidth = ((actualMax - actualMin) / (maxPrice - minPrice)) * 100;
 
     const handleClearAll = () => {
-        setFilterOption({
-            priceMin: "",
-            priceMax: "",
-            paymentMethod: {
-                robux: false,
-                paypal: false,
-                card: false
-            },
-            sortOption: ""
-        })
+        onClear();
     };
 
     return (
@@ -260,7 +251,10 @@ export const Sidebar = (props: SidebarProps) => {
 
                 {/* Action Buttons */}
                 <div className="space-y-3">
-                    <button className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold transition-all shadow-lg shadow-primary/20">
+                    <button
+                        onClick={onApply}
+                        className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold transition-all shadow-lg shadow-primary/20"
+                    >
                         Confirm
                     </button>
                     <button
