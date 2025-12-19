@@ -1,18 +1,13 @@
 interface FilterOption {
     priceMin: string;
     priceMax: string;
-    paymentMethod: {
-        crypto: boolean;
-        paypal: boolean;
-        card: boolean;
-    };
+    paymentMethod: string; // "crypto" | "paypal" | "card" | ""
     sortOption: string;
 }
 
 interface SidebarProps {
     filterOption: FilterOption;
     setFilterOption: (value: FilterOption) => void;
-    onApply: () => void;
     onClear: () => void;
 }
 

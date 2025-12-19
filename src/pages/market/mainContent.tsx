@@ -51,9 +51,9 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
         return {
             priceMin,
             priceMax,
-            paymentCrypto: paymentMethod.crypto || undefined,
-            paymentPaypal: paymentMethod.paypal || undefined,
-            paymentCard: paymentMethod.card || undefined,
+            paymentCrypto: paymentMethod === "crypto" || undefined,
+            paymentPaypal: paymentMethod === "paypal" || undefined,
+            paymentCard: paymentMethod === "card" || undefined,
         };
     }, [filterOption]);
 

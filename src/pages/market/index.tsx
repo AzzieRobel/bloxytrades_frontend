@@ -5,25 +5,15 @@ import { MainContent } from "./mainContent";
 const initialFilter: FilterOption = {
   priceMin: "",
   priceMax: "",
-  paymentMethod: {
-    crypto: false,
-    paypal: false,
-    card: false,
-  },
+  paymentMethod: "",
   sortOption: "",
 };
 
 export default function Market() {
   const [filterOption, setFilterOption] = useState<FilterOption>(initialFilter);
-  const [appliedFilter, setAppliedFilter] = useState<FilterOption>(initialFilter);
-
-  const handleApplyFilters = () => {
-    setAppliedFilter(filterOption);
-  };
 
   const handleClearFilters = () => {
     setFilterOption(initialFilter);
-    setAppliedFilter(initialFilter);
   };
 
   return (
@@ -34,12 +24,11 @@ export default function Market() {
           <Sidebar
             filterOption={filterOption}
             setFilterOption={setFilterOption}
-            onApply={handleApplyFilters}
             onClear={handleClearFilters}
           />
 
           {/* Main Content */}
-          <MainContent filterOption={appliedFilter} />
+          <MainContent filterOption={filterOption} />
         </div>
       </div>
     </div>
