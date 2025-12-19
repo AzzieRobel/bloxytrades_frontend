@@ -1,54 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckCircle2, Circle } from 'lucide-react';
-import { sellerService, listingService, userService } from '@/services';
+import { GlobalContext } from '@/contexts/context';
+import { userService } from '@/services';
 import { BankCard, Bitcoin, Paypal } from '@/icons/market.icons';
 
 export default function SellerProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const [sellerProfile, setSellerProfile] = useState<any>(null);
+  const { state } = useContext(GlobalContext);
   const [user, setUser] = useState<any>(null);
-  const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // Get all listings from context
+  const allListings = state.listings || [];
+
+  // Filter listings by seller ID
+  const sellerListings = allListings.filter((listing: any) => 
+    listing.sellerId === id && listing.isActive !== false
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
       if (!id) return;
       
       try {
         setIsLoading(true);
-        setError(null);
-
-        // Fetch seller profile, user info, and listings in parallel
-        const [sellerData, userData, listingsData] = await Promise.all([
-          sellerService.getSellerById(id).catch(() => null),
-          userService.getUserById(id).catch(() => null),
-          listingService.getListingsBySeller(id).catch(() => ({ listings: [] })),
-        ]);
-
-        if (sellerData) {
-          setSellerProfile(sellerData.seller);
-        }
+        const userData = await userService.getUserById(id);
         if (userData) {
           setUser(userData.user);
         }
-        if (listingsData) {
-          setListings(listingsData.listings || []);
-        }
       } catch (err: any) {
-        console.error('Failed to load seller profile:', err);
-        setError(err?.response?.data?.message || 'Failed to load seller profile');
+        console.error('Failed to load user:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    void fetchData();
+    void fetchUser();
   }, [id]);
 
   // Transform listings to items format for display
-  const items = listings.map((listing: any, index: number) => {
+  const items = sellerListings.map((listing: any, index: number) => {
     const priceValue = listing.price?.USD || listing.price?.usd || 0;
     const priceString = typeof priceValue === 'number' ? `$${priceValue.toFixed(0)}` : '$0';
 
@@ -75,18 +67,10 @@ export default function SellerProfilePage() {
     };
   });
 
-  if (isLoading) {
+  if (isLoading && !user) {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error || !user) {
-    return (
-      <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-        <div className="text-white text-lg">{error || 'Seller not found'}</div>
       </div>
     );
   }
@@ -105,15 +89,17 @@ export default function SellerProfilePage() {
             <div className="w-24 h-24 rounded-full bg-black/40 border-2 border-[#5650EF] flex items-center justify-center overflow-hidden">
               <div className="w-full h-full bg-gradient-to-br from-[#5650EF]/20 to-black flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">
-                  {user.username?.charAt(0).toUpperCase() || 'S'}
+                  {(user?.username || id || 'S').charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
 
             {/* Username and Badges */}
             <div className="flex items-center gap-2">
-              <h1 className="text-white text-3xl font-bold">{user.username || 'Unknown Seller'}</h1>
-              {user.isVerifiedSeller && (
+              <h1 className="text-white text-3xl font-bold">
+                {user?.username || id || 'Unknown Seller'}
+              </h1>
+              {user?.isVerifiedSeller && (
                 <CheckCircle2 className="w-5 h-5 text-[#5650EF]" fill="#5650EF" />
               )}
               <Circle className="w-4 h-4 text-white" />
