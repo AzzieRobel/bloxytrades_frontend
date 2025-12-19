@@ -24,6 +24,12 @@ export class ListingService {
     const res = await api.delete(`/listings/${id}`, headers)
     return res.data;
   }
+
+  async getListingsBySeller(sellerId: string) {
+    // Public endpoint, no auth required
+    const res = await api.get(`/listings/seller/${sellerId}`);
+    return res.data as { listings: Listing[] };
+  }
 }
 
 

@@ -50,6 +50,12 @@ export class SellerService {
       }>;
     };
   }
+
+  async getSellerById(sellerId: string) {
+    // Public endpoint, no auth required
+    const res = await api.get(`/sellers/${sellerId}`);
+    return res.data as { seller: SellerProfile };
+  }
 }
 
 

@@ -25,4 +25,10 @@ export class UserService {
         const res = await api.post("/users/connect-roblox", data, headers);
         return res.data;
     }
+
+    async getUserById(userId: string) {
+        // Public endpoint, no auth required
+        const res = await api.get(`/users/${userId}`);
+        return res.data as { user: UserState };
+    }
 }
