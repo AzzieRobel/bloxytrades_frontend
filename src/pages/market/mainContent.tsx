@@ -21,11 +21,12 @@ export const MainContent = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-    const { listings, isLoading, getAllListing } = useListing();
+    const { listings, isLoading, hasMore, loadInitialListings, loadMoreListings } = useListing();
 
-    // Fetch listings on mount
+    // Fetch listings on mount (newest first)
     useEffect(() => {
-        void getAllListing();
+        void loadInitialListings("newest");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Transform listings to items format for display
@@ -129,7 +130,7 @@ export const MainContent = () => {
 
             {/* Items Grid */}
             <div className={`grid gap-4 ${minimizedView ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"}`}>
-                {isLoading ? (
+                {isLoading && filteredItems.length === 0 ? (
                     <div className="col-span-full text-center text-gray-400 py-12">
                         Loading listings...
                     </div>
@@ -138,63 +139,77 @@ export const MainContent = () => {
                         {searchQuery ? 'No listings match your search.' : 'No listings found.'}
                     </div>
                 ) : (
-                    filteredItems.map((item: Item) => (
-                        <div
-                            key={item.id}
-                            onClick={() => {
-                                setSelectedItem(item);
-                                setIsPurchaseModalOpen(true);
-                            }}
-                            className="bg-[#0f0d16] border border-white/10 rounded-sm overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
-                        >
-                            <div className={`relative ${minimizedView ? "aspect-square" : "aspect-square"}`}>
-                                {item.badges && item.badges.length > 0 && (
-                                    <span className='absolute top-2 right-2 px-2 py-1 flex gap-1 z-10'>
-                                        {item.badges.map((badge: React.ReactNode, idx: number) => (
-                                            <span key={idx} className="flex items-center">
-                                                {badge}
-                                            </span>
-                                        ))}
-                                    </span>
+                    <>
+                        {filteredItems.map((item: Item) => (
+                            <div
+                                key={item.id}
+                                onClick={() => {
+                                    setSelectedItem(item);
+                                    setIsPurchaseModalOpen(true);
+                                }}
+                                className="bg-[#0f0d16] border border-white/10 rounded-sm overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
+                            >
+                                <div className={`relative ${minimizedView ? "aspect-square" : "aspect-square"}`}>
+                                    {item.badges && item.badges.length > 0 && (
+                                        <span className='absolute top-2 right-2 px-2 py-1 flex gap-1 z-10'>
+                                            {item.badges.map((badge: React.ReactNode, idx: number) => (
+                                                <span key={idx} className="flex items-center">
+                                                    {badge}
+                                                </span>
+                                            ))}
+                                        </span>
+                                    )}
+                                    <img
+                                        src={item.image}
+                                        alt={item.name}
+                                        className={`w-full object-contain ${minimizedView ? "p-4" : "p-8"}`}
+                                    />
+                                </div>
+                                {!minimizedView && (
+                                    <div className="p-3 bg-primary/10 border-t border-t-white/10">
+                                        <h3 className="font-semibold text-white mb-2.5 truncate">{item.name}</h3>
+                                        <div className="flex items-center justify-around text-md">
+                                            <div className='leading-[100%]'>
+                                                <div className="text-primary text-xs">RAP</div>
+                                                <div className="text-base">{item.rap}</div>
+                                            </div>
+                                            <div className='leading-[100%]'>
+                                                <div className="text-primary text-xs">Price</div>
+                                                <div className="text-base">{item.price}</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className={`w-full object-contain ${minimizedView ? "p-4" : "p-8"}`}
-                                />
+                                {minimizedView && (
+                                    <div className="p-2 bg-primary/10 border-t border-t-white/10">
+                                        <h3 className="font-semibold text-white text-xs mb-1 truncate">{item.name}</h3>
+                                        <div className="flex items-center justify-between text-xs">
+                                            <div>
+                                                <span className="text-primary">RAP: </span>
+                                                <span className="text-white">{item.rap}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-primary">Price: </span>
+                                                <span className="text-white">{item.price}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            {!minimizedView && (
-                                <div className="p-3 bg-primary/10 border-t border-t-white/10">
-                                    <h3 className="font-semibold text-white mb-2.5 truncate">{item.name}</h3>
-                                    <div className="flex items-center justify-around text-md">
-                                        <div className='leading-[100%]'>
-                                            <div className="text-primary text-xs">RAP</div>
-                                            <div className="text-base">{item.rap}</div>
-                                        </div>
-                                        <div className='leading-[100%]'>
-                                            <div className="text-primary text-xs">Price</div>
-                                            <div className="text-base">{item.price}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            {minimizedView && (
-                                <div className="p-2 bg-primary/10 border-t border-t-white/10">
-                                    <h3 className="font-semibold text-white text-xs mb-1 truncate">{item.name}</h3>
-                                    <div className="flex items-center justify-between text-xs">
-                                        <div>
-                                            <span className="text-primary">RAP: </span>
-                                            <span className="text-white">{item.rap}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-primary">Price: </span>
-                                            <span className="text-white">{item.price}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ))
+                        ))}
+
+                        {hasMore && (
+                            <div className="col-span-full flex justify-center py-6">
+                                <button
+                                    onClick={() => void loadMoreListings()}
+                                    disabled={isLoading}
+                                    className="px-6 py-2.5 rounded-sm bg-primary text-white font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {isLoading ? "Loading..." : "Load more"}
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
