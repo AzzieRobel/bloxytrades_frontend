@@ -26,11 +26,16 @@ export default function SellerProfilePage() {
       try {
         setIsLoading(true);
         const userData = await userService.getUserById(id);
-        if (userData) {
+        if (userData && userData.user) {
           setUser(userData.user);
         }
       } catch (err: any) {
-        console.error('Failed to load user:', err);
+        // Silently handle 404 - user doesn't exist, but we can still show listings
+        if (err?.response?.status !== 404) {
+          console.error('Failed to load user:', err);
+        }
+        // Set user to null so UI shows fallback (id or 'Unknown Seller')
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
