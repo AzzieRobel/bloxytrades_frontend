@@ -134,20 +134,21 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                   <p className="text-gray-400">
                     RAP: <span className="text-white">{item.rap}</span>
                   </p>
-                  <p className="text-gray-400 flex items-center gap-1">
-                    Seller:{' '}
+                  <p className="text-gray-400 flex items-center gap-1 min-w-0">
+                    <span className="flex-shrink-0">Seller:</span>
                     {item.listingData?.sellerId ? (
                       <Link
                         to={`/seller/${item.listingData.sellerId}`}
                         onClick={onClose}
-                        className="text-primary hover:text-primary/80 transition-colors"
+                        className="text-primary hover:text-primary/80 transition-colors truncate max-w-[200px]"
+                        title={item.listingData.sellerId}
                       >
                         {item.listingData.sellerId}
                       </Link>
                     ) : (
-                      <span className="text-white">dylan23</span>
+                      <span className="text-white truncate max-w-[200px]">dylan23</span>
                     )}
-                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                   </p>
                 </div>
               </div>
