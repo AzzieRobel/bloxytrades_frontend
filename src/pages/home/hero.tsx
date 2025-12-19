@@ -35,7 +35,7 @@ export const HeroSection = () => {
                 </p>
                 <div className="relative mb-[94px]">
                     <Link
-                        to="/marketplace"
+                        to="/market"
                         className="inline-flex items-center gap-3 px-8 py-3 bg-primary text-white rounded-2xl font-bold text-base"
                     >
                         <CirclePlay />

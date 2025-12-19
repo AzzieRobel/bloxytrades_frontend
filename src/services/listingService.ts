@@ -1,34 +1,28 @@
 import { api } from "./api";
-
-const withAuth = (token: string | null) =>
-  token
-    ? {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    : {};
+import { authService } from ".";
 
 export class ListingService {
-  async getMyListings(token: string) {
-    const res = await api.get("/listings/mine", withAuth(token));
-    return res.data as {
-      listings: Array<{
-        id: string;
-        title: string;
-        description: string;
-        price: number;
-        status: "active" | "inactive" | "sold";
-        createdAt: string;
-      }>;
-    };
+  async getAllListing() {
+    const headers = await authService.headers()
+    const res = await api.get("/listings", headers);
+    return res.data;
   }
 
-  async createListing(
-    token: string,
-    payload: { title: string; description: string; price: number }
-  ) {
-    const res = await api.post("/listings", payload, withAuth(token));
+  async addListing(data: any) {
+    const headers = await authService.headers()
+    const res = await api.post("/listings", data, headers);
+    return res.data;
+  }
+
+  async updateListing(data: any) {
+    const headers = await authService.headers()
+    const res = await api.put(`/listings/${data.id}`, data, headers)
+    return res.data;
+  }
+
+  async removeListing(id: string) {
+    const headers = await authService.headers()
+    const res = await api.delete(`/listings/${id}`, headers)
     return res.data;
   }
 }

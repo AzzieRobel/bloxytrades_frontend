@@ -12,7 +12,7 @@ export const Sidebar = (props: MarketSidebarProps) => {
                     { id: "sales-history" as TabType, label: "Sales History" },
                     { id: "subscriptions" as TabType, label: "Subscriptions" },
                     { id: "chargeback" as TabType, label: "Chargeback Center" }
-                ].map((tab) => (
+                ].filter(tab => tab.id !== "onboarding").map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}

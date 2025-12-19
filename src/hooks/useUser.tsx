@@ -30,5 +30,13 @@ export function useUser() {
         } catch (error: any) { throw error }
     }
 
-    return { user: state.user, getUser, changeEmail, changeUsername, changePassword };
+    const connectRoblox = async (data: { robloxUserId: string, robloxUsername: string }) => {
+        try {
+            const result: { user: UserState } = await userService.connectRoblox(data);
+            update({ user: { ...result.user } });
+            return { success: true, user: result.user };
+        } catch (error: any) { throw error }
+    }
+
+    return { user: state.user, getUser, changeEmail, changeUsername, changePassword, connectRoblox };
 }

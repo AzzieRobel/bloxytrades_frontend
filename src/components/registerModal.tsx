@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { GlobalContext } from '../contexts/context';
+import { useAuthModal } from '../hooks/useAuthModal';
 import toast from 'react-hot-toast';
 
 export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
@@ -15,7 +15,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
     agreeToTerms: false,
   });
   const { register, googleLogin } = useAuth();
-  const { closeRegisterModal } = useContext(GlobalContext);
+  const { closeRegisterModal } = useAuthModal();
 
   if (!isOpen) return null;
 

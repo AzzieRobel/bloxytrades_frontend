@@ -4,15 +4,14 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 
 import { cn } from '../lib/utils';
 import { Discord } from '../icons/footer.icons';
-import { useContext } from 'react';
-import { GlobalContext } from '../contexts/context';
+import { useAuthModal } from '../hooks/useAuthModal';
 import { useAuth } from '../hooks/useAuth';
 import { UserDropdown } from './UserDropdown';
 
 export function Navbar() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = React.useState(false);
-  const { openLoginModal, openRegisterModal } = useContext(GlobalContext);
+  const { openLoginModal, openRegisterModal } = useAuthModal();
   const { user, isAuthenticated, logout } = useAuth();
 
   const navLinks = [

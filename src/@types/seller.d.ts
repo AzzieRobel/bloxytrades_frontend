@@ -1,4 +1,4 @@
-type TabType = "dashboard" | "list-items" | "sales-history" | "subscriptions" | "chargeback";
+type TabType = "dashboard" | "list-items" | "sales-history" | "subscriptions" | "chargeback" | "onboarding";
 type SalesFilterType = "completed" | "pending" | "flagged";
 
 interface Order {

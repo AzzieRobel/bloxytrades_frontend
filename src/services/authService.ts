@@ -1,6 +1,16 @@
+import { getToken } from "@/utils/auth";
 import { api } from "./api";
 
 export class AuthService {
+    async headers() {
+        const token = getToken();
+        return {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    }
+
     async login(identifier: string, password: string): Promise<AuthResponse> {
         const res = await api.post("/auth/login", { identifier, password });
         return res.data;

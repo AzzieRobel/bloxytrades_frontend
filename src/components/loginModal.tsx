@@ -1,6 +1,6 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { GlobalContext } from '../contexts/context';
+import { useAuthModal } from '../hooks/useAuthModal';
 import toast from 'react-hot-toast';
 
 export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
@@ -11,7 +11,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     password: '',
   });
   const { login, googleLogin } = useAuth();
-  const { closeLoginModal, openForgotPasswordModal } = useContext(GlobalContext);
+  const { closeLoginModal, openForgotPasswordModal } = useAuthModal();
 
   if (!isOpen) return null;
 

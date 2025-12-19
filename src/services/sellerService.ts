@@ -1,17 +1,22 @@
 import { api } from "./api";
-
-const withAuth = (token: string | null) =>
-  token
-    ? {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    : {};
+import { authService } from ".";
 
 export class SellerService {
-  async getDashboard(token: string) {
-    const res = await api.get("/sellers/me/dashboard", withAuth(token));
+  async getProfile() {
+    const headers = await authService.headers()
+    const res = await api.get("/sellers/me", headers);
+    return res.data as { seller: SellerProfile }
+  }
+
+  async updateProfile(data: Record<string, unknown>) {
+    const headers = await authService.headers()
+    const res = await api.put("/sellers/me", data, headers);
+    return res.data as { seller: SellerProfile }
+  }
+
+  async getDashboard() {
+    const headers = await authService.headers()
+    const res = await api.get("/sellers/me/dashboard", headers);
     return res.data as {
       stats: {
         todayTransactions: number;
@@ -30,8 +35,9 @@ export class SellerService {
     };
   }
 
-  async getSales(token: string) {
-    const res = await api.get("/sellers/me/sales", withAuth(token));
+  async getSales() {
+    const headers = await authService.headers()
+    const res = await api.get("/sellers/me/sales", headers);
     return res.data as {
       orders: Array<{
         id: string;
