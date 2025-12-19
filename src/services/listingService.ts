@@ -13,7 +13,7 @@ interface GetAllListingParams {
   cursorId?: string;
   priceMin?: number;
   priceMax?: number;
-  paymentRobux?: boolean;
+  paymentCrypto?: boolean;
   paymentPaypal?: boolean;
   paymentCard?: boolean;
 }
@@ -33,7 +33,7 @@ export class ListingService {
       cursorId,
       priceMin,
       priceMax,
-      paymentRobux,
+      paymentCrypto,
       paymentPaypal,
       paymentCard,
     } = params;
@@ -46,7 +46,7 @@ export class ListingService {
         cursorId,
         priceMin,
         priceMax,
-        paymentRobux,
+        paymentCrypto,
         paymentPaypal,
         paymentCard,
       },

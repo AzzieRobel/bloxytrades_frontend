@@ -188,7 +188,7 @@ export const Sidebar = (props: SidebarProps) => {
                     <h3 className="text-base font-semibold text-left mb-3">Payment Method</h3>
                     <div className="space-y-2.5">
                         {[
-                            { key: "robux", label: "Robux" },
+                            { key: "crypto", label: "Crypto" },
                             { key: "paypal", label: "Paypal" },
                             { key: "card", label: "Card" }
                         ].map((method) => (

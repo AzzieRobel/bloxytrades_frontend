@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { X, Check, Search, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -87,8 +88,8 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                 <div className="flex flex-col items-center flex-1">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${currentStep >= step.number
-                        ? 'bg-primary text-white'
-                        : 'bg-white/10 text-gray-400'
+                      ? 'bg-primary text-white'
+                      : 'bg-white/10 text-gray-400'
                       }`}
                   >
                     {currentStep > step.number ? (
@@ -119,7 +120,7 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
         <div className="p-6">
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Item Details */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center text-left">
               <div className="w-24 h-24 bg-[#0f0f0f] rounded-lg flex items-center justify-center flex-shrink-0 border border-white/10">
                 <img
                   src={item.image}
@@ -134,7 +135,18 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                     RAP: <span className="text-white">{item.rap}</span>
                   </p>
                   <p className="text-gray-400 flex items-center gap-1">
-                    Seller: <span className="text-white">dylan23</span>
+                    Seller:{' '}
+                    {item.listingData?.sellerId ? (
+                      <Link
+                        to={`/seller/${item.listingData.sellerId}`}
+                        onClick={onClose}
+                        className="text-primary hover:text-primary/80 transition-colors"
+                      >
+                        {item.listingData.sellerId}
+                      </Link>
+                    ) : (
+                      <span className="text-white">dylan23</span>
+                    )}
                     <CheckCircle2 className="w-4 h-4 text-green-400" />
                   </p>
                 </div>

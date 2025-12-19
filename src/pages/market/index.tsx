@@ -6,7 +6,7 @@ const initialFilter: FilterOption = {
   priceMin: "",
   priceMax: "",
   paymentMethod: {
-    robux: false,
+    crypto: false,
     paypal: false,
     card: false,
   },

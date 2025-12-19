@@ -6,7 +6,7 @@ import { listingService } from "@/services";
 type ListingFilters = {
   priceMin?: number;
   priceMax?: number;
-  paymentRobux?: boolean;
+  paymentCrypto?: boolean;
   paymentPaypal?: boolean;
   paymentCard?: boolean;
 };

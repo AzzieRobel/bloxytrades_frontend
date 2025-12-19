@@ -2,9 +2,9 @@ interface FilterOption {
     priceMin: string;
     priceMax: string;
     paymentMethod: {
-        robux: false,
-        paypal: false,
-        card: false
+        crypto: boolean;
+        paypal: boolean;
+        card: boolean;
     };
     sortOption: string;
 }

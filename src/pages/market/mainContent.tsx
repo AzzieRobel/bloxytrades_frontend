@@ -23,7 +23,7 @@ interface MainContentProps {
 type ListingFilters = {
   priceMin?: number;
   priceMax?: number;
-  paymentRobux?: boolean;
+  paymentCrypto?: boolean;
   paymentPaypal?: boolean;
   paymentCard?: boolean;
 };
@@ -51,7 +51,7 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
         return {
             priceMin,
             priceMax,
-            paymentRobux: paymentMethod.robux || undefined,
+            paymentCrypto: paymentMethod.crypto || undefined,
             paymentPaypal: paymentMethod.paypal || undefined,
             paymentCard: paymentMethod.card || undefined,
         };
