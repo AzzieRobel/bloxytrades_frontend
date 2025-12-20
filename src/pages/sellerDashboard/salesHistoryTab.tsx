@@ -9,7 +9,7 @@ export const SalesHistoryTab = () => {
     const filteredSales = sales.filter((sale) => {
         if (salesFilter === "completed") return sale.status === "completed";
         if (salesFilter === "pending") return sale.status === "pending";
-        if (salesFilter === "flagged") return sale.status === "cancelled";
+        if (salesFilter === "failed") return sale.status === "failed";
         return true;
     });
 
@@ -60,13 +60,13 @@ export const SalesHistoryTab = () => {
                     Pending
                 </button>
                 <button
-                    onClick={() => setSalesFilter("flagged")}
-                    className={`px-6 py-2.5 rounded-md font-semibold text-sm transition-all ${salesFilter === "flagged"
+                    onClick={() => setSalesFilter("failed")}
+                    className={`px-6 py-2.5 rounded-md font-semibold text-sm transition-all ${salesFilter === "failed"
                         ? "bg-[#5650EF] text-white"
                         : "bg-black/40 text-gray-400 border border-white/10 hover:border-white/20"
                         }`}
                 >
-                    Flagged
+                    Failed
                 </button>
             </div>
 

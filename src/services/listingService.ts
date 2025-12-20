@@ -78,6 +78,12 @@ export class ListingService {
     const res = await api.get(`/listings/seller/${sellerId}`);
     return res.data as { listings: Listing[] };
   }
+
+  async getMyListings() {
+    const headers = await authService.headers();
+    const res = await api.get("/listings/mine", headers);
+    return res.data as { listings: Listing[] };
+  }
 }
 
 

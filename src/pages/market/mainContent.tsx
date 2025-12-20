@@ -17,7 +17,7 @@ const categories = [
 ];
 
 interface MainContentProps {
-  filterOption: FilterOption;
+    filterOption: FilterOption;
 }
 
 type ListingFilters = {

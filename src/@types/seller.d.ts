@@ -1,5 +1,5 @@
 type TabType = "dashboard" | "list-items" | "sales-history" | "subscriptions" | "chargeback" | "onboarding";
-type SalesFilterType = "completed" | "pending" | "flagged";
+type SalesFilterType = "completed" | "pending" | "failed";
 
 interface Order {
     trackingId: string;
