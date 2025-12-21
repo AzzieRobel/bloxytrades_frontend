@@ -51,3 +51,15 @@ interface MyListing extends Listing {
     isActive: boolean;
     createdAt?: string | Date;
 }
+
+interface MainContentProps {
+    filterOption: FilterOption;
+}
+
+type ListingFilters = {
+    priceMin?: number;
+    priceMax?: number;
+    paymentCrypto?: boolean;
+    paymentPaypal?: boolean;
+    paymentCard?: boolean;
+};

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Search, ToggleLeft, ToggleRight, Star } from 'lucide-react';
 
-import { config } from '../../config'
 import { PurchaseModal } from '../../components/PurchaseModal';
 import { useListing } from '../../hooks/useListing';
+import { config } from '../../config'
 import { BankCard, Bitcoin, Paypal } from '../../icons/market.icons';
+import { formatPriceCompact } from '@/utils';
 
 const categories = [
     { name: "LIMITEDS", image: config.limited },
@@ -15,18 +16,6 @@ const categories = [
     { name: "Steal A Brainrot", image: config.steal_a_brainrot },
     { name: "Adopt Me", image: config.adopt_me }
 ];
-
-interface MainContentProps {
-    filterOption: FilterOption;
-}
-
-type ListingFilters = {
-  priceMin?: number;
-  priceMax?: number;
-  paymentCrypto?: boolean;
-  paymentPaypal?: boolean;
-  paymentCard?: boolean;
-};
 
 export const MainContent = ({ filterOption }: MainContentProps) => {
     const [minimizedView, setMinimizedView] = useState(false);
@@ -70,37 +59,25 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [backendSort, JSON.stringify(serverFilters)]);
 
-    // Transform listings to items format for display
     const items: Item[] = listings.map((listing: any, index: number) => {
         const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
-        const priceNumeric =
-            typeof priceValueRaw === "number"
-                ? priceValueRaw
-                : parseFloat(priceValueRaw) || 0;
+        const priceNum = typeof priceValueRaw === "number" ? priceValueRaw : parseFloat(priceValueRaw) || 0;
+        const priceString = formatPriceCompact(priceNum);
+        const rapString = formatPriceCompact(listing.rap);
 
-        const priceString =
-            typeof priceNumeric === "number" ? `$${priceNumeric.toFixed(0)}` : "$0";
-
-        // Build badges array based on accepted payments
         const badges: React.ReactNode[] = [];
-        if (listing.acceptedPayments?.crypto) {
-            badges.push(<Bitcoin key="crypto" />);
-        }
-        if (listing.acceptedPayments?.paypal) {
-            badges.push(<Paypal key="paypal" />);
-        }
-        if (listing.acceptedPayments?.stripe) {
-            badges.push(<BankCard key="bank" />);
-        }
+        if (listing.acceptedPayments?.crypto) badges.push(<Bitcoin key="crypto" />);
+        if (listing.acceptedPayments?.paypal) badges.push(<Paypal key="paypal" />);
+        if (listing.acceptedPayments?.stripe) badges.push(<BankCard key="bank" />);
 
         return {
             id: listing.id || index + 1,
-            name: listing.itemName || 'Unnamed Item',
-            image: listing.imageUrl || '',
-            rap: "180K", // Default RAP value (can be added to listing model later)
+            name: listing.itemName,
+            image: listing.imageUrl,
+            rap: rapString,
             price: priceString,
             badges,
-            priceNumeric,
+            priceNum,
             listingData: listing,
         };
     });

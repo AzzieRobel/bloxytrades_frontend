@@ -1,8 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { CheckCircle2, Circle } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+
 import { GlobalContext } from '@/contexts/context';
 import { userService } from '@/services';
+import { formatPriceCompact } from '@/utils';
 import { BankCard, Bitcoin, Paypal } from '@/icons/market.icons';
 
 export default function SellerProfilePage() {
@@ -11,18 +13,16 @@ export default function SellerProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get all listings from context
   const allListings = state.listings || [];
 
-  // Filter listings by seller ID
-  const sellerListings = allListings.filter((listing: any) => 
+  const sellerListings = allListings.filter((listing: any) =>
     listing.sellerId === id && listing.isActive !== false
   );
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!id) return;
-      
+
       try {
         setIsLoading(true);
         const userData = await userService.getUserById(id);
@@ -30,11 +30,9 @@ export default function SellerProfilePage() {
           setUser(userData.user);
         }
       } catch (err: any) {
-        // Silently handle 404 - user doesn't exist, but we can still show listings
         if (err?.response?.status !== 404) {
           console.error('Failed to load user:', err);
         }
-        // Set user to null so UI shows fallback (id or 'Unknown Seller')
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -44,28 +42,22 @@ export default function SellerProfilePage() {
     void fetchUser();
   }, [id]);
 
-  // Transform listings to items format for display
   const items = sellerListings.map((listing: any, index: number) => {
-    const priceValue = listing.price?.USD || listing.price?.usd || 0;
-    const priceString = typeof priceValue === 'number' ? `$${priceValue.toFixed(0)}` : '$0';
+    const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
+    const priceNum = typeof priceValueRaw === "number" ? priceValueRaw : parseFloat(priceValueRaw) || 0;
+    const priceString = formatPriceCompact(priceNum);
+    const rapString = formatPriceCompact(listing.rap);
 
-    // Build badges array based on accepted payments
     const badges: React.ReactNode[] = [];
-    if (listing.acceptedPayments?.crypto) {
-      badges.push(<Bitcoin key="crypto" />);
-    }
-    if (listing.acceptedPayments?.paypal) {
-      badges.push(<Paypal key="paypal" />);
-    }
-    if (listing.acceptedPayments?.stripe) {
-      badges.push(<BankCard key="bank" />);
-    }
+    if (listing.acceptedPayments?.crypto) badges.push(<Bitcoin key="crypto" />);
+    if (listing.acceptedPayments?.paypal) badges.push(<Paypal key="paypal" />);
+    if (listing.acceptedPayments?.stripe) badges.push(<BankCard key="bank" />);
 
     return {
       id: listing.id || index + 1,
-      name: listing.itemName || 'Unnamed Item',
-      image: "https://adurite.com/_next/image?url=https%3A%2F%2Fimages.adurite.com%2Fimages%3FassetId%3D77443491%26width%3D420%26height%3D420%26format%3DPng&w=128&q=75",
-      rap: "180K", // Default RAP value
+      name: listing.itemName,
+      image: listing.imageUrl,
+      rap: rapString,
       price: priceString,
       badges,
       listingData: listing,
