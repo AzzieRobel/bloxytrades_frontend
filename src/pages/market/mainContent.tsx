@@ -96,7 +96,7 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
         return {
             id: listing.id || index + 1,
             name: listing.itemName || 'Unnamed Item',
-            image: "https://adurite.com/_next/image?url=https%3A%2F%2Fimages.adurite.com%2Fimages%3FassetId%3D77443491%26width%3D420%26height%3D420%26format%3DPng&w=128&q=75",
+            image: listing.imageUrl || '',
             rap: "180K", // Default RAP value (can be added to listing model later)
             price: priceString,
             badges,

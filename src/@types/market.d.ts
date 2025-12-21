@@ -27,3 +27,28 @@ interface PurchaseModalProps {
     onClose: () => void;
     item: Item | null;
 }
+
+interface ImageUploadModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    currentImageUrl?: string;
+    onImageChange: (url: string) => void;
+}
+
+interface ImageUploadProps {
+    imageUrl?: string;
+    onImageChange: (url: string) => void;
+}
+
+interface MyListing extends Listing {
+    id: string;
+    itemName: string;
+    description: string;
+    quantity: number;
+    price: Record<string, any>;
+    imageUrl?: string;
+    acceptedPayments: Record<string, any>;
+    estimatedDeliveryTime: number;
+    isActive: boolean;
+    createdAt?: string | Date;
+}

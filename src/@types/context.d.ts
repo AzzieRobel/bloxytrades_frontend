@@ -33,6 +33,7 @@ interface Listing {
     description: string;
     quantity: number;
     price: Record<string, any>; // Object type for price
+    imageUrl?: string; // Cloudinary image URL
     acceptedPayments: Record<string, any>; // Object type for accepted payments
     estimatedDeliveryTime: number;
     isActive: boolean;
