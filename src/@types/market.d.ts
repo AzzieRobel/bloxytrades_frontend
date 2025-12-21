@@ -43,7 +43,6 @@ interface ImageUploadProps {
 interface MyListing extends Listing {
     id: string;
     itemName: string;
-    description: string;
     quantity: number;
     price: Record<string, any>;
     imageUrl?: string;

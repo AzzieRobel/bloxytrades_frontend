@@ -30,9 +30,9 @@ interface Listing {
     id: string;
     sellerId: string;
     itemName: string;
-    description: string;
     quantity: number;
     price: Record<string, any>; // Object type for price
+    rap?: number; // Roblox Asset Price
     imageUrl?: string; // Cloudinary image URL
     acceptedPayments: Record<string, any>; // Object type for accepted payments
     estimatedDeliveryTime: number;

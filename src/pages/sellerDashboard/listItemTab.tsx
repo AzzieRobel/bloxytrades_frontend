@@ -9,19 +9,19 @@ import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 
 export const ListItemTab = () => {
     const { createListing, updateListing, removeListing } = useListing();
-    const [myListings, setMyListings] = useState<MyListing[]>([]);
+    const [myListings, setMyListings] = useState<Listing[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [expandedRow, setExpandedRow] = useState<string | null>(null);
-    const [editingListing, setEditingListing] = useState<MyListing | null>(null);
-    const [deletingListing, setDeletingListing] = useState<MyListing | null>(null);
+    const [editingListing, setEditingListing] = useState<Listing | null>(null);
+    const [deletingListing, setDeletingListing] = useState<Listing | null>(null);
     const [isImageUploadModalOpen, setIsImageUploadModalOpen] = useState(false);
     const [isEditImageUploadModalOpen, setIsEditImageUploadModalOpen] = useState(false);
 
     const [form, setForm] = useState({
         title: "",
-        description: "",
         price: "",
-        quantity: "1",
+        rap: "",
+        quantity: "",
         estimatedDeliveryTime: "24",
         imageUrl: "",
         paymentMethods: {
@@ -33,8 +33,8 @@ export const ListItemTab = () => {
 
     const [editForm, setEditForm] = useState({
         title: "",
-        description: "",
         price: "",
+        rap: "",
         quantity: "1",
         estimatedDeliveryTime: "24",
         imageUrl: "",
@@ -66,10 +66,11 @@ export const ListItemTab = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const priceNumber = Number(form.price);
+        const rapNumber = form.rap ? Number(form.rap) : undefined;
         const quantityNumber = Number(form.quantity);
         const deliveryTime = Number(form.estimatedDeliveryTime);
 
-        if (!form.title.trim() || !form.description.trim() || !priceNumber || priceNumber <= 0) {
+        if (!form.title.trim() || !priceNumber || priceNumber <= 0) {
             toast.error("Please fill in all required fields");
             return;
         }
@@ -83,9 +84,9 @@ export const ListItemTab = () => {
             setIsLoading(true);
             await createListing({
                 itemName: form.title,
-                description: form.description,
                 quantity: quantityNumber || 1,
                 price: { USD: priceNumber },
+                rap: rapNumber,
                 imageUrl: form.imageUrl || undefined,
                 acceptedPayments: {
                     crypto: form.paymentMethods.crypto,
@@ -98,8 +99,8 @@ export const ListItemTab = () => {
             });
             setForm({
                 title: "",
-                description: "",
                 price: "",
+                rap: "",
                 quantity: "1",
                 estimatedDeliveryTime: "24",
                 imageUrl: "",
@@ -119,12 +120,12 @@ export const ListItemTab = () => {
         }
     };
 
-    const handleEdit = (listing: MyListing) => {
+    const handleEdit = (listing: Listing) => {
         const priceValue = listing.price?.USD || listing.price?.usd || 0;
         setEditForm({
             title: listing.itemName,
-            description: listing.description,
             price: priceValue.toString(),
+            rap: listing.rap?.toString() || "",
             quantity: listing.quantity.toString(),
             estimatedDeliveryTime: listing.estimatedDeliveryTime.toString(),
             imageUrl: listing.imageUrl || "",
@@ -142,10 +143,11 @@ export const ListItemTab = () => {
         if (!editingListing) return;
 
         const priceNumber = Number(editForm.price);
+        const rapNumber = editForm.rap ? Number(editForm.rap) : undefined;
         const quantityNumber = Number(editForm.quantity);
         const deliveryTime = Number(editForm.estimatedDeliveryTime);
 
-        if (!editForm.title.trim() || !editForm.description.trim() || !priceNumber || priceNumber <= 0) {
+        if (!editForm.title.trim() || !priceNumber || priceNumber <= 0) {
             toast.error("Please fill in all required fields");
             return;
         }
@@ -160,9 +162,9 @@ export const ListItemTab = () => {
             await updateListing({
                 id: editingListing.id,
                 itemName: editForm.title,
-                description: editForm.description,
                 quantity: quantityNumber || 1,
                 price: { USD: priceNumber },
+                rap: rapNumber,
                 imageUrl: editForm.imageUrl || undefined,
                 acceptedPayments: {
                     crypto: editForm.paymentMethods.crypto,
@@ -200,7 +202,7 @@ export const ListItemTab = () => {
         }
     };
 
-    const handleToggleActive = async (listing: MyListing) => {
+    const handleToggleActive = async (listing: Listing) => {
         try {
             setIsLoading(true);
             await updateListing({
@@ -245,18 +247,7 @@ export const ListItemTab = () => {
                                     required
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm text-left text-gray-300 mb-1">Description : </label>
-                                <textarea
-                                    value={form.description}
-                                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                                    className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60 min-h-[80px]"
-                                    placeholder="Describe your item"
-                                    required
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-4 mb-2">
                                 <div>
                                     <label className="block text-sm text-left text-gray-300 mb-1">Price (USD) : </label>
                                     <input
@@ -271,12 +262,37 @@ export const ListItemTab = () => {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-sm text-left text-gray-300 mb-1">RAP : </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={form.rap}
+                                        onChange={(e) => setForm({ ...form, rap: e.target.value })}
+                                        className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
+                                        placeholder="0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
                                     <label className="block text-sm text-left text-gray-300 mb-1">Quantity : </label>
                                     <input
                                         type="number"
                                         min="1"
+                                        placeholder="5"
                                         value={form.quantity}
                                         onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                                        className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-2">
+                                    <label className="block text-sm text-left text-gray-300 mb-1">Estimated Delivery Time (hours) : </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={form.estimatedDeliveryTime}
+                                        onChange={(e) => setForm({ ...form, estimatedDeliveryTime: e.target.value })}
                                         className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
                                         required
                                     />
@@ -284,61 +300,72 @@ export const ListItemTab = () => {
                             </div>
                         </div>
                         <div>
-                            <div className="mb-2">
-                                <label className="block text-sm text-left text-gray-300 mb-1">Estimated Delivery Time (hours) : </label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={form.estimatedDeliveryTime}
-                                    onChange={(e) => setForm({ ...form, estimatedDeliveryTime: e.target.value })}
-                                    className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
-                                    required
-                                />
-                            </div>
+
                             <div className="mb-2">
                                 <label className="block text-sm text-left text-gray-300 mb-1">Accepted Payment Methods : </label>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-3 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.paymentMethods.crypto}
-                                            onChange={(e) =>
-                                                setForm({
-                                                    ...form,
-                                                    paymentMethods: { ...form.paymentMethods, crypto: e.target.checked },
-                                                })
-                                            }
-                                            className="w-5 h-5 rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer"
-                                        />
-                                        <span className="text-gray-300 text-sm text-left">Crypto</span>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={form.paymentMethods.crypto}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        paymentMethods: { ...form.paymentMethods, crypto: e.target.checked },
+                                                    })
+                                                }
+                                                className="w-5 h-5 rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer transition-all duration-200 hover:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none appearance-none"
+                                            />
+                                            {form.paymentMethods.crypto && (
+                                                <svg className="absolute top-0 left-0 w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="3">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                        <span className="text-gray-300 text-sm text-left group-hover:text-white transition-colors">Crypto</span>
                                     </label>
-                                    <label className="flex items-center gap-3 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.paymentMethods.paypal}
-                                            onChange={(e) =>
-                                                setForm({
-                                                    ...form,
-                                                    paymentMethods: { ...form.paymentMethods, paypal: e.target.checked },
-                                                })
-                                            }
-                                            className="w-5 h-5 rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer"
-                                        />
-                                        <span className="text-gray-300 text-sm text-left">PayPal</span>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={form.paymentMethods.paypal}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        paymentMethods: { ...form.paymentMethods, paypal: e.target.checked },
+                                                    })
+                                                }
+                                                className="w-5 h-5 rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer transition-all duration-200 hover:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none appearance-none"
+                                            />
+                                            {form.paymentMethods.paypal && (
+                                                <svg className="absolute top-0 left-0 w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="3">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                        <span className="text-gray-300 text-sm text-left group-hover:text-white transition-colors">PayPal</span>
                                     </label>
-                                    <label className="flex items-center gap-3 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.paymentMethods.card}
-                                            onChange={(e) =>
-                                                setForm({
-                                                    ...form,
-                                                    paymentMethods: { ...form.paymentMethods, card: e.target.checked },
-                                                })
-                                            }
-                                            className="w-5 h-5 rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer"
-                                        />
-                                        <span className="text-gray-300 text-sm text-left">Card</span>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={form.paymentMethods.card}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        paymentMethods: { ...form.paymentMethods, card: e.target.checked },
+                                                    })
+                                                }
+                                                className="w-5 h-5 rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer transition-all duration-200 hover:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none appearance-none"
+                                            />
+                                            {form.paymentMethods.card && (
+                                                <svg className="absolute top-0 left-0 w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="3">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                        <span className="text-gray-300 text-sm text-left group-hover:text-white transition-colors">Card</span>
                                     </label>
                                 </div>
                             </div>
