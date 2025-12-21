@@ -235,31 +235,31 @@ export const ListItemTab = () => {
                 <h2 className="text-white text-xl font-bold mb-4">Create New Listing</h2>
                 <form onSubmit={handleSubmit} className="space-y-4 text-center">
                     <div className="flex justify-around gap-4">
-                        <div>
+                    <div>
                             <div className="mb-2">
                                 <label className="block text-sm text-left text-gray-300 mb-1">Title : </label>
-                                <input
-                                    type="text"
-                                    value={form.title}
-                                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                    className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
-                                    placeholder="Enter item title"
-                                    required
-                                />
-                            </div>
+                        <input
+                            type="text"
+                            value={form.title}
+                            onChange={(e) => setForm({ ...form, title: e.target.value })}
+                            className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
+                            placeholder="Enter item title"
+                            required
+                        />
+                    </div>
                             <div className="grid grid-cols-2 gap-4 mb-2">
-                                <div>
+                    <div>
                                     <label className="block text-sm text-left text-gray-300 mb-1">Price (USD) : </label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        value={form.price}
-                                        onChange={(e) => setForm({ ...form, price: e.target.value })}
-                                        className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
-                                        placeholder="0.00"
-                                        required
-                                    />
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={form.price}
+                            onChange={(e) => setForm({ ...form, price: e.target.value })}
+                            className="w-full px-4 py-2 bg-black border border-white/10 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/60"
+                            placeholder="0.00"
+                            required
+                        />
                                 </div>
                                 <div>
                                     <label className="block text-sm text-left text-gray-300 mb-1">RAP : </label>
@@ -458,7 +458,7 @@ export const ListItemTab = () => {
                                                 <td className="px-6 py-4 text-gray-400 text-sm font-mono">
                                                     {listing.id.substring(0, 8)}...
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-200">{listing.itemName}</td>
+                                            <td className="px-6 py-4 text-gray-200">{listing.itemName}</td>
                                                 <td className="px-6 py-4 text-gray-200">
                                                     ${typeof priceValue === 'number' ? priceValue.toFixed(2) : '0.00'}
                                                 </td>
@@ -470,7 +470,7 @@ export const ListItemTab = () => {
                                                             : 'bg-gray-500/20 text-gray-400'
                                                             }`}
                                                     >
-                                                        {listing.isActive ? 'Active' : 'Inactive'}
+                                                {listing.isActive ? 'Active' : 'Inactive'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-200">
@@ -485,7 +485,7 @@ export const ListItemTab = () => {
                                                     ) : (
                                                         <ChevronDown className="w-5 h-5 text-gray-400" />
                                                     )}
-                                                </td>
+                                            </td>
                                             </tr>
                                             {isExpanded && (
                                                 <tr>
@@ -531,8 +531,8 @@ export const ListItemTab = () => {
                                                                 Remove
                                                             </button>
                                                         </div>
-                                                    </td>
-                                                </tr>
+                                            </td>
+                                        </tr>
                                             )}
                                         </React.Fragment>
                                     );

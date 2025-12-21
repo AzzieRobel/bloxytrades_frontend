@@ -38,3 +38,17 @@ interface RegisterModalProps {
   onClose: () => void;
   onSwitchToLogin?: () => void;
 }
+
+interface AuthModalContextType {
+  isLoginModalOpen: boolean;
+  isRegisterModalOpen: boolean;
+  isForgotPasswordOpen: boolean;
+  openLoginModal: () => void;
+  openRegisterModal: () => void;
+  openForgotPasswordModal: () => void;
+  closeLoginModal: () => void;
+  closeRegisterModal: () => void;
+  closeForgotPasswordModal: () => void;
+  switchToRegister: () => void;
+  switchToLogin: () => void;
+}

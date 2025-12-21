@@ -1,19 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-interface AuthModalContextType {
-    isLoginModalOpen: boolean;
-    isRegisterModalOpen: boolean;
-    isForgotPasswordOpen: boolean;
-    openLoginModal: () => void;
-    openRegisterModal: () => void;
-    openForgotPasswordModal: () => void;
-    closeLoginModal: () => void;
-    closeRegisterModal: () => void;
-    closeForgotPasswordModal: () => void;
-    switchToRegister: () => void;
-    switchToLogin: () => void;
-}
-
 const AuthModalContext = createContext<AuthModalContextType | undefined>(undefined);
 
 export function AuthModalProvider({ children }: { children: ReactNode }) {
@@ -86,9 +72,8 @@ export function AuthModalProvider({ children }: { children: ReactNode }) {
 
 export function useAuthModal() {
     const context = useContext(AuthModalContext);
-    if (!context) {
+    if (!context)
         throw new Error('useAuthModal must be used within an AuthModalProvider');
-    }
     return context;
 }
 
