@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Check, Search, CheckCircle2 } from 'lucide-react';
+import { X, Check, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
@@ -58,9 +58,18 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
     },
   ];
 
-  // Extract numeric price for total calculation
-  const priceValue = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
-  const total = priceValue.toFixed(2);
+  // Extract numeric price for total calculation (prefer raw numeric value)
+  const priceValue =
+    typeof item.priceNumeric === 'number'
+      ? item.priceNumeric
+      : typeof item.listingData?.price?.USD === 'number'
+        ? item.listingData.price.USD
+        : parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0;
+
+  const total = priceValue.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -172,7 +181,7 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Search your account..."
-                className="flex-1 px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
+                className="flex-1 px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     handleSearch();
@@ -182,7 +191,7 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
               <button
                 onClick={handleSearch}
                 disabled={isSearching}
-                className="px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+                className="px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-md transition-colors"
               >
                 {isSearching ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

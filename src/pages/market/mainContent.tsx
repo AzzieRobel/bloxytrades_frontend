@@ -20,7 +20,7 @@ const categories = [
 export const MainContent = ({ filterOption }: MainContentProps) => {
     const [minimizedView, setMinimizedView] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const { listings, isLoading, hasMore, loadInitialListings, loadMoreListings } = useListing();
 
@@ -59,28 +59,32 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [backendSort, JSON.stringify(serverFilters)]);
 
-    const items: Item[] = listings.map((listing: any, index: number) => {
-        const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
-        const priceNum = typeof priceValueRaw === "number" ? priceValueRaw : parseFloat(priceValueRaw) || 0;
-        const priceString = formatPriceCompact(priceNum);
-        const rapString = formatPriceCompact(listing.rap);
+    const items: Item[] = useMemo(() => {
+        return listings.map((listing: any, index: number) => {
+            const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
+            const priceNum = typeof priceValueRaw === "number" ? priceValueRaw : parseFloat(priceValueRaw) || 0;
+            const priceString = priceNum.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            const rapNum = typeof listing.rap === "number" ? listing.rap : Number(listing.rap) || 0;
+            const rapString = formatPriceCompact(rapNum);
 
-        const badges: React.ReactNode[] = [];
-        if (listing.acceptedPayments?.crypto) badges.push(<Bitcoin key="crypto" />);
-        if (listing.acceptedPayments?.paypal) badges.push(<Paypal key="paypal" />);
-        if (listing.acceptedPayments?.stripe) badges.push(<BankCard key="bank" />);
+            const badges: React.ReactNode[] = [];
+            if (listing.acceptedPayments?.crypto) badges.push(<Bitcoin key="crypto" />);
+            if (listing.acceptedPayments?.paypal) badges.push(<Paypal key="paypal" />);
+            if (listing.acceptedPayments?.stripe) badges.push(<BankCard key="bank" />);
 
-        return {
-            id: listing.id || index + 1,
-            name: listing.itemName,
-            image: listing.imageUrl,
-            rap: rapString,
-            price: priceString,
-            badges,
-            priceNum,
-            listingData: listing,
-        };
-    });
+            return {
+                id: listing.id || index + 1,
+                name: listing.itemName,
+                image: listing.imageUrl,
+                rap: rapString,
+                price: priceString,
+                priceNumeric: priceNum,
+                rapValue: rapNum,
+                badges,
+                listingData: listing,
+            };
+        });
+    }, [listings]);
 
     // Helper to parse RAP like "180K" to a number (placeholder until RAP is real)
     const parseRap = (rap: string): number => {
@@ -92,24 +96,26 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
     };
 
     // Compute final filtered + sorted items (search + RAP / fallback sorting).
-    const filteredItems = items
-        .filter((item: Item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .sort((a: Item, b: Item) => {
-            const sort = filterOption.sortOption;
+    const filteredItems = useMemo(() => {
+        return items
+            .filter((item: Item) =>
+                item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .sort((a: Item, b: Item) => {
+                const sort = filterOption.sortOption;
 
-            // RAP-based sorts (placeholder until RAP is real on listings)
-            if (sort === "rap-high" || sort === "rap-low") {
-                const ra = parseRap(a.rap);
-                const rb = parseRap(b.rap);
-                if (sort === "rap-high") return rb - ra;
-                return ra - rb;
-            }
+                // RAP-based sorts (placeholder until RAP is real on listings)
+                if (sort === "rap-high" || sort === "rap-low") {
+                    const ra = parseRap(a.rap);
+                    const rb = parseRap(b.rap);
+                    if (sort === "rap-high") return rb - ra;
+                    return ra - rb;
+                }
 
-            // Default: keep API order (newest first)
-            return 0;
-        });
+                // Default: keep API order (newest first)
+                return 0;
+            });
+    }, [items, searchQuery, filterOption.sortOption]);
 
     return (
         <main className="flex-1">
@@ -224,7 +230,7 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
                                             </div>
                                             <div className='leading-[100%]'>
                                                 <div className="text-primary text-xs">Price</div>
-                                                <div className="text-base">{item.price}</div>
+                                                <div className="text-base">${item.price}</div>
                                             </div>
                                         </div>
                                     </div>

@@ -16,6 +16,7 @@ interface Item {
     name: string;
     image: string;
     rap: string;
+    rapValue?: number;
     price: string;
     badges?: any;
     priceNumeric?: number;
