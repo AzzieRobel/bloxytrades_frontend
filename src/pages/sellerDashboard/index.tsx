@@ -26,7 +26,7 @@ export default function SellerDashboard() {
         ))
     );
     const isRobloxConnected = !!(user?.robloxUserId && user?.robloxUsername);
-    
+
     // If profile doesn't exist yet, show onboarding
     // If profile exists but is not enabled, or payment/roblox not connected, show onboarding
     const needsOnboarding = !profile || !profile.isEnabled || !isPaymentConnected || !isRobloxConnected;
@@ -57,7 +57,7 @@ export default function SellerDashboard() {
 
     // Show regular dashboard if enabled
     return (
-        <div className="min-h-screen pt-20 bg-black relative overflow-hidden">
+        <div className="min-h-screen pt-12 bg-black relative overflow-hidden">
             {/* Background gradient effects */}
             <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-[#5650EF]/5 rounded-full blur-[200px]" />
             <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-[#5650EF]/5 rounded-full blur-[200px]" />

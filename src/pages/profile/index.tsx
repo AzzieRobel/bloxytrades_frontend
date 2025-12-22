@@ -92,7 +92,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 relative">
+    <div className="bg-dark-900 relative">
       {/* Background Pattern */}
       <div
         className="absolute inset-0 opacity-20"
@@ -102,7 +102,7 @@ export default function ProfilePage() {
         }}
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-12">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 pt-[9rem] pb-[9.5rem]">
         {/* Main Card */}
         <div className="bg-[#1a1a1a] border border-white/10 rounded-lg shadow-2xl overflow-hidden">
           {/* Overview Section */}

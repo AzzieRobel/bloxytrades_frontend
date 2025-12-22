@@ -61,29 +61,29 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
 
     const items: Item[] = useMemo(() => {
         return listings.map((listing: any, index: number) => {
-            const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
+        const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
             const priceNum = typeof priceValueRaw === "number" ? priceValueRaw : parseFloat(priceValueRaw) || 0;
             const priceString = priceNum.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             const rapNum = typeof listing.rap === "number" ? listing.rap : Number(listing.rap) || 0;
             const rapString = formatPriceCompact(rapNum);
 
-            const badges: React.ReactNode[] = [];
+        const badges: React.ReactNode[] = [];
             if (listing.acceptedPayments?.crypto) badges.push(<Bitcoin key="crypto" />);
             if (listing.acceptedPayments?.paypal) badges.push(<Paypal key="paypal" />);
             if (listing.acceptedPayments?.stripe) badges.push(<BankCard key="bank" />);
 
-            return {
-                id: listing.id || index + 1,
+        return {
+            id: listing.id || index + 1,
                 name: listing.itemName,
                 image: listing.imageUrl,
                 rap: rapString,
-                price: priceString,
+            price: priceString,
                 priceNumeric: priceNum,
                 rapValue: rapNum,
-                badges,
-                listingData: listing,
-            };
-        });
+            badges,
+            listingData: listing,
+        };
+    });
     }, [listings]);
 
     // Helper to parse RAP like "180K" to a number (placeholder until RAP is real)
@@ -98,23 +98,23 @@ export const MainContent = ({ filterOption }: MainContentProps) => {
     // Compute final filtered + sorted items (search + RAP / fallback sorting).
     const filteredItems = useMemo(() => {
         return items
-            .filter((item: Item) =>
-                item.name.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            .sort((a: Item, b: Item) => {
-                const sort = filterOption.sortOption;
+        .filter((item: Item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a: Item, b: Item) => {
+            const sort = filterOption.sortOption;
 
-                // RAP-based sorts (placeholder until RAP is real on listings)
-                if (sort === "rap-high" || sort === "rap-low") {
-                    const ra = parseRap(a.rap);
-                    const rb = parseRap(b.rap);
-                    if (sort === "rap-high") return rb - ra;
-                    return ra - rb;
-                }
+            // RAP-based sorts (placeholder until RAP is real on listings)
+            if (sort === "rap-high" || sort === "rap-low") {
+                const ra = parseRap(a.rap);
+                const rb = parseRap(b.rap);
+                if (sort === "rap-high") return rb - ra;
+                return ra - rb;
+            }
 
-                // Default: keep API order (newest first)
-                return 0;
-            });
+            // Default: keep API order (newest first)
+            return 0;
+        });
     }, [items, searchQuery, filterOption.sortOption]);
 
     return (
