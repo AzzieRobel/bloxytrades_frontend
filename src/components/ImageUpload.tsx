@@ -3,7 +3,7 @@ import { Upload, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { config } from '@/config';
 
-import { isValidImageType, isValidExtension, isValidCloudinaryUrl } from '@/utils';
+import { isValidImageType, isValidExtension, isValidCloudinaryUrl } from '@/utils/cloudinary';
 const { MAX_FILE_SIZE, ALLOWED_MIME_TYPES } = config;
 
 export const ImageUpload = ({ imageUrl, onImageChange }: ImageUploadProps) => {
