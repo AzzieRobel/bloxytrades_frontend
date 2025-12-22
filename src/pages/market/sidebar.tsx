@@ -94,7 +94,7 @@ export const Sidebar = (props: SidebarProps) => {
                                 type="text"
                                 value={filterOption.priceMin}
                                 onChange={(e) => handleFilterChange({ ...filterOption, priceMin: e.target.value })}
-                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50"
+                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-primary/50"
                                 placeholder="min $0.28"
                             />
                         </div>
@@ -104,7 +104,7 @@ export const Sidebar = (props: SidebarProps) => {
                                 type="text"
                                 value={filterOption.priceMax}
                                 onChange={(e) => handleFilterChange({ ...filterOption, priceMax: e.target.value })}
-                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50"
+                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-primary/50"
                                 placeholder="max $100000"
                             />
                         </div>
