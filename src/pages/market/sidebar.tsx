@@ -1,14 +1,12 @@
 import { useRef } from 'react';
 
-import { Check } from '../../icons/market.icons'
-
 export const Sidebar = (props: SidebarProps) => {
-    const { filterOption, setFilterOption } = props
+    const { filterOption, setFilterOption, onClear } = props
     const minInputRef = useRef<HTMLInputElement>(null);
     const maxInputRef = useRef<HTMLInputElement>(null);
 
     const minPrice = 0;
-    const maxPrice = 2000;
+    const maxPrice = 100000;
 
     // Get numeric values from filterOption
     const getMinValue = () => {
@@ -32,13 +30,13 @@ export const Sidebar = (props: SidebarProps) => {
 
         // If min exceeds max, swap them
         if (newMin > currentMax) {
-            setFilterOption({
+            handleFilterChange({
                 ...filterOption,
                 priceMin: `$${currentMax.toFixed(2)}`,
                 priceMax: `$${newMin.toFixed(2)}`
             });
         } else {
-            setFilterOption({ ...filterOption, priceMin: `$${newMin.toFixed(2)}` });
+            handleFilterChange({ ...filterOption, priceMin: `$${newMin.toFixed(2)}` });
         }
     };
 
@@ -48,13 +46,13 @@ export const Sidebar = (props: SidebarProps) => {
 
         // If max goes below min, swap them
         if (newMax < currentMin) {
-            setFilterOption({
+            handleFilterChange({
                 ...filterOption,
                 priceMin: `$${newMax.toFixed(2)}`,
                 priceMax: `$${currentMin.toFixed(2)}`
             });
         } else {
-            setFilterOption({ ...filterOption, priceMax: `$${newMax.toFixed(2)}` });
+            handleFilterChange({ ...filterOption, priceMax: `$${newMax.toFixed(2)}` });
         }
     };
 
@@ -65,16 +63,12 @@ export const Sidebar = (props: SidebarProps) => {
     const highlightWidth = ((actualMax - actualMin) / (maxPrice - minPrice)) * 100;
 
     const handleClearAll = () => {
-        setFilterOption({
-            priceMin: "",
-            priceMax: "",
-            paymentMethod: {
-                robux: false,
-                paypal: false,
-                card: false
-            },
-            sortOption: ""
-        })
+        onClear();
+    };
+
+    // Apply filters immediately when any filter changes
+    const handleFilterChange = (newFilter: FilterOption) => {
+        setFilterOption(newFilter);
     };
 
     return (
@@ -99,8 +93,8 @@ export const Sidebar = (props: SidebarProps) => {
                             <input
                                 type="text"
                                 value={filterOption.priceMin}
-                                onChange={(e) => setFilterOption({ ...filterOption, priceMin: e.target.value })}
-                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50"
+                                onChange={(e) => handleFilterChange({ ...filterOption, priceMin: e.target.value })}
+                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-primary/50"
                                 placeholder="min $0.28"
                             />
                         </div>
@@ -109,9 +103,9 @@ export const Sidebar = (props: SidebarProps) => {
                             <input
                                 type="text"
                                 value={filterOption.priceMax}
-                                onChange={(e) => setFilterOption({ ...filterOption, priceMax: e.target.value })}
-                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-primary/50"
-                                placeholder="max $2000"
+                                onChange={(e) => handleFilterChange({ ...filterOption, priceMax: e.target.value })}
+                                className="w-full px-3 py-2.5 bg-[#1a1625] border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-primary/50"
+                                placeholder="max $100000"
                             />
                         </div>
                     </div>
@@ -197,29 +191,27 @@ export const Sidebar = (props: SidebarProps) => {
                     <h3 className="text-base font-semibold text-left mb-3">Payment Method</h3>
                     <div className="space-y-2.5">
                         {[
-                            { key: "robux", label: "Robux" },
-                            { key: "paypal", label: "Paypal" },
-                            { key: "card", label: "Card" }
+                            { value: "crypto", label: "Crypto" },
+                            { value: "paypal", label: "Paypal" },
+                            { value: "card", label: "Card" }
                         ].map((method) => (
-                            <label key={method.key} className="flex items-strech
-                             gap-3 cursor-pointer group">
+                            <label key={method.value} className="flex items-strech gap-3 cursor-pointer group">
                                 <div className="relative">
                                     <input
-                                        type="checkbox"
-                                        checked={filterOption.paymentMethod[method.key as keyof typeof filterOption.paymentMethod]}
+                                        type="radio"
+                                        name="paymentMethod"
+                                        value={method.value}
+                                        checked={filterOption.paymentMethod === method.value}
                                         onChange={(e) =>
-                                            setFilterOption({
+                                            handleFilterChange({
                                                 ...filterOption,
-                                                paymentMethod: {
-                                                    ...filterOption.paymentMethod,
-                                                    [method.key]: e.target.checked
-                                                }
+                                                paymentMethod: e.target.value
                                             })
                                         }
-                                        className="w-5 h-5 appearance-none rounded border-2 border-white/20 bg-transparent checked:bg-primary checked:border-primary cursor-pointer transition-all"
+                                        className="w-5 h-5 appearance-none rounded-full border-2 border-white/20 bg-transparent checked:border-primary cursor-pointer transition-all"
                                     />
-                                    {filterOption.paymentMethod[method.key as keyof typeof filterOption.paymentMethod] && (
-                                        <Check />
+                                    {filterOption.paymentMethod === method.value && (
+                                        <div className="w-2.5 h-2.5 bg-primary rounded-full absolute top-[0.3rem] left-[0.35rem] pointer-events-none" />
                                     )}
                                 </div>
                                 <span className="text-gray-300 text-sm group-hover:text-white transition-colors">{method.label}</span>
@@ -245,7 +237,7 @@ export const Sidebar = (props: SidebarProps) => {
                                         name="sort"
                                         value={option.value}
                                         checked={filterOption.sortOption === option.value}
-                                        onChange={(e) => setFilterOption({ ...filterOption, sortOption: e.target.value })}
+                                        onChange={(e) => handleFilterChange({ ...filterOption, sortOption: e.target.value })}
                                         className="w-5 h-5 appearance-none rounded-full border-2 border-white/20 bg-transparent checked:border-primary cursor-pointer transition-all"
                                     />
                                     {filterOption.sortOption === option.value && (
@@ -260,9 +252,6 @@ export const Sidebar = (props: SidebarProps) => {
 
                 {/* Action Buttons */}
                 <div className="space-y-3">
-                    <button className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold transition-all shadow-lg shadow-primary/20">
-                        Confirm
-                    </button>
                     <button
                         onClick={handleClearAll}
                         className="w-full py-3 hover:bg-white/5 text-gray-400 hover:text-white rounded-xl font-semibold transition-all"

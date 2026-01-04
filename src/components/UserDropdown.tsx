@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { User, LogOut, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/utils';
 
 export function UserDropdown() {
@@ -90,4 +90,3 @@ export function UserDropdown() {
     </div>
   );
 }
-

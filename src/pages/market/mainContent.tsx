@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Search, ToggleLeft, ToggleRight, Star } from 'lucide-react';
 
-import { config } from '../../config'
 import { PurchaseModal } from '../../components/PurchaseModal';
+import { useListing } from '../../hooks/useListing';
+import { config } from '../../config'
+import { BankCard, Bitcoin, Paypal } from '../../icons/market.icons';
+import { formatPriceCompact } from '@/utils';
 
 const categories = [
     { name: "LIMITEDS", image: config.limited },
@@ -14,11 +17,105 @@ const categories = [
     { name: "Adopt Me", image: config.adopt_me }
 ];
 
-export const MainContent = () => {
+export const MainContent = ({ filterOption }: MainContentProps) => {
     const [minimizedView, setMinimizedView] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+    const { listings, isLoading, hasMore, loadInitialListings, loadMoreListings } = useListing();
+
+    // Build server-side filters from applied filterOption
+    const serverFilters: ListingFilters = useMemo(() => {
+        const parsePrice = (val: string | undefined): number | undefined => {
+            if (!val) return undefined;
+            const n = parseFloat(val.replace("$", "").trim());
+            return isNaN(n) ? undefined : n;
+        };
+
+        const priceMin = parsePrice(filterOption.priceMin);
+        const priceMax = parsePrice(filterOption.priceMax);
+
+        const { paymentMethod } = filterOption;
+
+        return {
+            priceMin,
+            priceMax,
+            paymentCrypto: paymentMethod === "crypto" || undefined,
+            paymentPaypal: paymentMethod === "paypal" || undefined,
+            paymentCard: paymentMethod === "card" || undefined,
+        };
+    }, [filterOption]);
+
+    // Decide sort for backend: support price-high/price-low; others -> newest
+    const backendSort: "newest" | "price-high" | "price-low" = useMemo(() => {
+        if (filterOption.sortOption === "price-high") return "price-high";
+        if (filterOption.sortOption === "price-low") return "price-low";
+        return "newest";
+    }, [filterOption.sortOption]);
+
+    // Fetch listings whenever applied filters or backend sort change
+    useEffect(() => {
+        void loadInitialListings(backendSort, serverFilters);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [backendSort, JSON.stringify(serverFilters)]);
+
+    const items: Item[] = useMemo(() => {
+        return listings.map((listing: any, index: number) => {
+        const priceValueRaw = listing.price?.USD ?? listing.price?.usd ?? 0;
+            const priceNum = typeof priceValueRaw === "number" ? priceValueRaw : parseFloat(priceValueRaw) || 0;
+            const priceString = priceNum.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            const rapNum = typeof listing.rap === "number" ? listing.rap : Number(listing.rap) || 0;
+            const rapString = formatPriceCompact(rapNum);
+
+        const badges: React.ReactNode[] = [];
+            if (listing.acceptedPayments?.crypto) badges.push(<Bitcoin key="crypto" />);
+            if (listing.acceptedPayments?.paypal) badges.push(<Paypal key="paypal" />);
+            if (listing.acceptedPayments?.stripe) badges.push(<BankCard key="bank" />);
+
+        return {
+            id: listing.id || index + 1,
+                name: listing.itemName,
+                image: listing.imageUrl,
+                rap: rapString,
+            price: priceString,
+                priceNumeric: priceNum,
+                rapValue: rapNum,
+            badges,
+            listingData: listing,
+        };
+    });
+    }, [listings]);
+
+    // Helper to parse RAP like "180K" to a number (placeholder until RAP is real)
+    const parseRap = (rap: string): number => {
+        if (!rap) return 0;
+        const upper = rap.toUpperCase().trim();
+        const hasK = upper.endsWith("K");
+        const numeric = parseFloat(upper.replace(/[^0-9.]/g, "")) || 0;
+        return hasK ? numeric * 1000 : numeric;
+    };
+
+    // Compute final filtered + sorted items (search + RAP / fallback sorting).
+    const filteredItems = useMemo(() => {
+        return items
+        .filter((item: Item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a: Item, b: Item) => {
+            const sort = filterOption.sortOption;
+
+            // RAP-based sorts (placeholder until RAP is real on listings)
+            if (sort === "rap-high" || sort === "rap-low") {
+                const ra = parseRap(a.rap);
+                const rb = parseRap(b.rap);
+                if (sort === "rap-high") return rb - ra;
+                return ra - rb;
+            }
+
+            // Default: keep API order (newest first)
+            return 0;
+        });
+    }, [items, searchQuery, filterOption.sortOption]);
 
     return (
         <main className="flex-1">
@@ -88,61 +185,87 @@ export const MainContent = () => {
 
             {/* Items Grid */}
             <div className={`grid gap-4 ${minimizedView ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"}`}>
-                {config.itemMockUpConfig.map((item) => (
-                    <div
-                        key={item.id}
-                        onClick={() => {
-                            setSelectedItem(item);
-                            setIsPurchaseModalOpen(true);
-                        }}
-                        className="bg-[#0f0d16] border border-white/10 rounded-sm overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
-                    >
-                        <div className={`relative ${minimizedView ? "aspect-square" : "aspect-square"}`}>
-                            {item.badge && (
-                                <span className='absolute top-2 right-2 px-2 py-1 flex z-10'>
-                                    {item.badge.crypto()}
-                                    {item.badge.paypal()}
-                                    {item.badge.bank()}
-                                </span>
-                            )}
-                            <img
-                                src={item.image}
-                                alt={item.name}
-                                className={`w-full object-contain ${minimizedView ? "p-4" : "p-8"}`}
-                            />
-                        </div>
-                        {!minimizedView && (
-                            <div className="p-3 bg-primary/10 border-t border-t-white/10">
-                                <h3 className="font-semibold text-white mb-2.5 truncate">{item.name}</h3>
-                                <div className="flex items-center justify-around text-md">
-                                    <div className='leading-[100%]'>
-                                        <div className="text-primary text-xs">RAP</div>
-                                        <div className="text-base">{item.rap}</div>
-                                    </div>
-                                    <div className='leading-[100%]'>
-                                        <div className="text-primary text-xs">Price</div>
-                                        <div className="text-base">{item.price}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {minimizedView && (
-                            <div className="p-2 bg-primary/10 border-t border-t-white/10">
-                                <h3 className="font-semibold text-white text-xs mb-1 truncate">{item.name}</h3>
-                                <div className="flex items-center justify-between text-xs">
-                                    <div>
-                                        <span className="text-primary">RAP: </span>
-                                        <span className="text-white">{item.rap}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-primary">Price: </span>
-                                        <span className="text-white">{item.price}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                {isLoading && filteredItems.length === 0 ? (
+                    <div className="col-span-full text-center text-gray-400 py-12">
+                        Loading listings...
                     </div>
-                ))}
+                ) : filteredItems.length === 0 ? (
+                    <div className="col-span-full text-center text-gray-400 py-12">
+                        {searchQuery ? 'No listings match your search.' : 'No listings found.'}
+                    </div>
+                ) : (
+                    <>
+                        {filteredItems.map((item: Item) => (
+                            <div
+                                key={item.id}
+                                onClick={() => {
+                                    setSelectedItem(item);
+                                    setIsPurchaseModalOpen(true);
+                                }}
+                                className="bg-[#0f0d16] border border-white/10 rounded-sm overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
+                            >
+                                <div className={`relative ${minimizedView ? "aspect-square" : "aspect-square"}`}>
+                                    {item.badges && item.badges.length > 0 && (
+                                        <span className='absolute top-2 right-2 px-2 py-1 flex gap-1 z-10'>
+                                            {item.badges.map((badge: React.ReactNode, idx: number) => (
+                                                <span key={idx} className="flex items-center">
+                                                    {badge}
+                                                </span>
+                                            ))}
+                                        </span>
+                                    )}
+                                    <img
+                                        src={item.image}
+                                        alt={item.name}
+                                        className={`w-full object-contain ${minimizedView ? "p-4" : "p-8"}`}
+                                    />
+                                </div>
+                                {!minimizedView && (
+                                    <div className="p-3 bg-primary/10 border-t border-t-white/10">
+                                        <h3 className="font-semibold text-white mb-2.5 truncate">{item.name}</h3>
+                                        <div className="flex items-center justify-around text-md">
+                                            <div className='leading-[100%]'>
+                                                <div className="text-primary text-xs">RAP</div>
+                                                <div className="text-base">{item.rap}</div>
+                                            </div>
+                                            <div className='leading-[100%]'>
+                                                <div className="text-primary text-xs">Price</div>
+                                                <div className="text-base">${item.price}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {minimizedView && (
+                                    <div className="p-2 bg-primary/10 border-t border-t-white/10">
+                                        <h3 className="font-semibold text-white text-xs mb-1 truncate">{item.name}</h3>
+                                        <div className="flex items-center justify-between text-xs">
+                                            <div>
+                                                <span className="text-primary">RAP: </span>
+                                                <span className="text-white">{item.rap}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-primary">Price: </span>
+                                                <span className="text-white">{item.price}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        {hasMore && (
+                            <div className="col-span-full flex justify-center py-6">
+                                <button
+                                    onClick={() => void loadMoreListings()}
+                                    disabled={isLoading}
+                                    className="px-6 py-2.5 rounded-sm bg-primary text-white font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {isLoading ? "Loading..." : "Load more"}
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
 
             {/* Purchase Modal */}

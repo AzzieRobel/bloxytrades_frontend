@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { GeneralQuestion, Payment, Return } from '../../icons/home.icons'
 import { config } from "../../config";
 
-const faqs = config.dashboardConfig.faqs;
+const faqsByCategory = config.dashboardConfig.faqs;
 const categoryLabels: Record<Category, string> = config.dashboardConfig.categoryLabels;
 
 export const FAQSection = () => {
@@ -73,7 +73,7 @@ export const FAQSection = () => {
                         </div>
 
                         <div className="space-y-4">
-                            {faqs.map((faq, i) => (
+                            {faqsByCategory[activeCategory].map((faq, i) => (
                                 <div
                                     key={i}
                                     className="border border-white/10 rounded-xl bg-dark-800/30 overflow-hidden hover:border-primary/30 transition-colors"

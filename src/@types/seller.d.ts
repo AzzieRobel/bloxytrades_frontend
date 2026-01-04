@@ -1,5 +1,5 @@
-type TabType = "dashboard" | "list-items" | "sales-history" | "subscriptions" | "chargeback";
-type SalesFilterType = "completed" | "pending" | "flagged";
+type TabType = "dashboard" | "list-items" | "sales-history" | "subscriptions" | "chargeback" | "onboarding";
+type SalesFilterType = "completed" | "pending" | "failed";
 
 interface Order {
     trackingId: string;
@@ -34,4 +34,39 @@ interface Dispute {
 interface MarketSidebarProps {
     activeTab: TabType;
     setActiveTab: (value: TabType) => void
+}
+
+interface SellerDashboardStats {
+    todayTransactions: number;
+    todayRevenue: number;
+    totalTransactions: number;
+    totalRevenue: number;
+}
+
+interface SellerOrder {
+    id: string;
+    listingId: string;
+    price: number;
+    fee: number;
+    status: string;
+    createdAt: string;
+}
+
+interface SellerSale {
+    id: string;
+    buyerId: string;
+    listingId: string;
+    price: number;
+    fee: number;
+    status: string;
+    createdAt: string;
+}
+
+interface SellerListing {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    status: "active" | "inactive" | "sold";
+    createdAt: string;
 }

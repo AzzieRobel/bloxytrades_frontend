@@ -1,17 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Clock, CheckCircle, XCircle, AlertCircle, Search } from 'lucide-react';
 
-type ClaimStatus = 'pending' | 'approved' | 'rejected' | 'resolved';
-
-interface Claim {
-  id: string;
-  title: string;
-  description: string;
-  status: ClaimStatus;
-  date: string;
-  orderId?: string;
-}
-
 export default function ClaimsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   

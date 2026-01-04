@@ -1,17 +1,14 @@
 interface FilterOption {
     priceMin: string;
     priceMax: string;
-    paymentMethod: {
-        robux: false,
-        paypal: false,
-        card: false
-    };
+    paymentMethod: string; // "crypto" | "paypal" | "card" | ""
     sortOption: string;
 }
 
 interface SidebarProps {
     filterOption: FilterOption;
     setFilterOption: (value: FilterOption) => void;
+    onClear: () => void;
 }
 
 interface Item {
@@ -19,6 +16,51 @@ interface Item {
     name: string;
     image: string;
     rap: string;
+    rapValue?: number;
     price: string;
-    badge?: any;
+    badges?: any;
+    priceNumeric?: number;
+    listingData?: any;
 }
+
+interface PurchaseModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    item: Item | null;
+}
+
+interface ImageUploadModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    currentImageUrl?: string;
+    onImageChange: (url: string) => void;
+}
+
+interface ImageUploadProps {
+    imageUrl?: string;
+    onImageChange: (url: string) => void;
+}
+
+interface MyListing extends Listing {
+    id: string;
+    itemName: string;
+    quantity: number;
+    price: Record<string, any>;
+    imageUrl?: string;
+    acceptedPayments: Record<string, any>;
+    estimatedDeliveryTime: number;
+    isActive: boolean;
+    createdAt?: string | Date;
+}
+
+interface MainContentProps {
+    filterOption: FilterOption;
+}
+
+type ListingFilters = {
+    priceMin?: number;
+    priceMax?: number;
+    paymentCrypto?: boolean;
+    paymentPaypal?: boolean;
+    paymentCard?: boolean;
+};

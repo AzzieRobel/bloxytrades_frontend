@@ -1,21 +1,7 @@
 import React, { useState } from 'react';
-import { X, Check, Search, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, Check, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-interface Item {
-  id: number;
-  name: string;
-  image: string;
-  rap: string;
-  price: string;
-  badge?: any;
-}
-
-interface PurchaseModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  item: Item | null;
-}
 
 export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
   const [currentStep, setCurrentStep] = useState(2);
@@ -72,9 +58,18 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
     },
   ];
 
-  // Extract numeric price for total calculation
-  const priceValue = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
-  const total = priceValue.toFixed(2);
+  // Extract numeric price for total calculation (prefer raw numeric value)
+  const priceValue =
+    typeof item.priceNumeric === 'number'
+      ? item.priceNumeric
+      : typeof item.listingData?.price?.USD === 'number'
+        ? item.listingData.price.USD
+        : parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0;
+
+  const total = priceValue.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -101,11 +96,10 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
               <React.Fragment key={step.number}>
                 <div className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
-                      currentStep >= step.number
-                        ? 'bg-primary text-white'
-                        : 'bg-white/10 text-gray-400'
-                    }`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${currentStep >= step.number
+                      ? 'bg-primary text-white'
+                      : 'bg-white/10 text-gray-400'
+                      }`}
                   >
                     {currentStep > step.number ? (
                       <Check className="w-5 h-5" />
@@ -114,18 +108,16 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                     )}
                   </div>
                   <span
-                    className={`text-xs mt-2 ${
-                      currentStep >= step.number ? 'text-white' : 'text-gray-500'
-                    }`}
+                    className={`text-xs mt-2 ${currentStep >= step.number ? 'text-white' : 'text-gray-500'
+                      }`}
                   >
                     {step.label}
                   </span>
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 rounded ${
-                      currentStep > step.number ? 'bg-primary' : 'bg-white/10'
-                    }`}
+                    className={`flex-1 h-1 mx-2 rounded ${currentStep > step.number ? 'bg-primary' : 'bg-white/10'
+                      }`}
                   />
                 )}
               </React.Fragment>
@@ -137,7 +129,7 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
         <div className="p-6">
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Item Details */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center text-left">
               <div className="w-24 h-24 bg-[#0f0f0f] rounded-lg flex items-center justify-center flex-shrink-0 border border-white/10">
                 <img
                   src={item.image}
@@ -151,9 +143,21 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                   <p className="text-gray-400">
                     RAP: <span className="text-white">{item.rap}</span>
                   </p>
-                  <p className="text-gray-400 flex items-center gap-1">
-                    Seller: <span className="text-white">dylan23</span>
-                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <p className="text-gray-400 flex items-center gap-1 min-w-0">
+                    <span className="flex-shrink-0">Seller:</span>
+                    {item.listingData?.sellerId ? (
+                      <Link
+                        to={`/seller/${item.listingData.sellerId}`}
+                        onClick={onClose}
+                        className="text-primary hover:text-primary/80 transition-colors truncate max-w-[200px]"
+                        title={item.listingData.sellerId}
+                      >
+                        {item.listingData.sellerId}
+                      </Link>
+                    ) : (
+                      <span className="text-white truncate max-w-[200px]">dylan23</span>
+                    )}
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                   </p>
                 </div>
               </div>
@@ -177,7 +181,7 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Search your account..."
-                className="flex-1 px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
+                className="flex-1 px-4 py-3 bg-[#0f0f0f] border border-white/10 rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     handleSearch();
@@ -187,7 +191,7 @@ export function PurchaseModal({ isOpen, onClose, item }: PurchaseModalProps) {
               <button
                 onClick={handleSearch}
                 disabled={isSearching}
-                className="px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+                className="px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-md transition-colors"
               >
                 {isSearching ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
