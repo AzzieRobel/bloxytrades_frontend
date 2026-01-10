@@ -6,11 +6,12 @@ import toast from 'react-hot-toast';
 export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useGoogleLogoImage, setUseGoogleLogoImage] = useState(true);
   const [formData, setFormData] = useState({
     emailOrUsername: '',
     password: '',
   });
-  const { login, googleLogin } = useAuth();
+  const { login, googleAuth } = useAuth();
   const { closeLoginModal, openForgotPasswordModal } = useAuthModal();
 
   if (!isOpen) return null;
@@ -38,7 +39,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
   const handleGoogleLogin = async () => {
     setIsSubmitting(true);
     try {
-      await googleLogin();
+      await googleAuth();
       closeLoginModal();
       onClose();
     } catch (error) {
@@ -137,20 +138,30 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
             </span>
           </div>
 
-          {/* Google Button - default style */}
+          {/* Google Sign-in Button */}
           <button
             type="button"
             onClick={handleGoogleLogin}
             disabled={isSubmitting}
-            className="w-full bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-medium py-3 px-4 rounded-md border border-gray-300 transition-colors flex items-center justify-center gap-3"
+            aria-label="Continue with Google"
+            className="w-full bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 font-medium py-3 px-4 rounded-lg border border-gray-300 transition-all duration-200 flex items-center justify-center gap-3 shadow-sm hover:shadow-md hover:border-gray-400 active:bg-gray-100"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#EA4335" d="M12 10.8v3.6h5.08c-.22 1.3-.9 2.4-1.9 3.14l3.07 2.38c1.8-1.66 2.85-4.1 2.85-7.02 0-.68-.06-1.34-.18-1.98H12z" />
-              <path fill="#34A853" d="M6.56 14.32l-.87.66-2.45 1.9C4.94 19.93 8.2 22 12 22c2.7 0 4.96-.9 6.61-2.44l-3.07-2.38c-.85.56-1.94.9-3.54.9-2.72 0-5.02-1.84-5.84-4.36z" />
-              <path fill="#4A90E2" d="M3.24 7.12A9.96 9.96 0 0 0 2 12c0 1.57.36 3.05 1 4.38l3.56-2.76a5.94 5.94 0 0 1 0-3.24L3.24 7.12z" />
-              <path fill="#FBBC05" d="M12 5.1c1.48 0 2.8.52 3.85 1.54l2.89-2.89C16.96 1.5 14.7.5 12 .5 8.2.5 4.94 2.57 3.24 5.88l3.56 2.76C6.98 6.94 9.28 5.1 12 5.1z" />
-            </svg>
-            <span>Sign in with Google</span>
+            {useGoogleLogoImage ? (
+              <img 
+                src="/googleLogo.png" 
+                alt="Google" 
+                className="w-5 h-5"
+                onError={() => setUseGoogleLogoImage(false)}
+              />
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 10.8v3.6h5.08c-.22 1.3-.9 2.4-1.9 3.14l3.07 2.38c1.8-1.66 2.85-4.1 2.85-7.02 0-.68-.06-1.34-.18-1.98H12z" />
+                <path fill="#34A853" d="M6.56 14.32l-.87.66-2.45 1.9C4.94 19.93 8.2 22 12 22c2.7 0 4.96-.9 6.61-2.44l-3.07-2.38c-.85.56-1.94.9-3.54.9-2.72 0-5.02-1.84-5.84-4.36z" />
+                <path fill="#4A90E2" d="M3.24 7.12A9.96 9.96 0 0 0 2 12c0 1.57.36 3.05 1 4.38l3.56-2.76a5.94 5.94 0 0 1 0-3.24L3.24 7.12z" />
+                <path fill="#FBBC05" d="M12 5.1c1.48 0 2.8.52 3.85 1.54l2.89-2.89C16.96 1.5 14.7.5 12 .5 8.2.5 4.94 2.57 3.24 5.88l3.56 2.76C6.98 6.94 9.28 5.1 12 5.1z" />
+              </svg>
+            )}
+            <span>Continue with Google</span>
           </button>
         </form>
       </div>

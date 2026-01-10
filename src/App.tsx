@@ -13,6 +13,7 @@ import SellerProfilePage from './pages/sellerProfile';
 import AffiliatePage from './pages/affiliate';
 import ClaimsPage from './pages/claims';
 import ContactPage from './pages/contact';
+import GoogleCallback from './pages/auth/googleCallback';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Router>
           <div className="App">
             <Routes>
+              <Route path="/auth/google/callback" element={<GoogleCallback />} />
               <Route path="/" element={<MainLayout />}>
                 <Route path="/market" element={<ProtectedRoute><Market /></ProtectedRoute>} />
                 <Route path="/seller-dashboard" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />

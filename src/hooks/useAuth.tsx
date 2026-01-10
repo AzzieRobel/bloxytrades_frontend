@@ -7,9 +7,7 @@ import { getStorageKey, getToken } from "@/utils/auth";
 
 export function useAuth() {
     const context = useContext(GlobalContext);
-    if (!context) {
-        throw new Error('useAuth must be used within a GlobalContextProvider');
-    }
+
     const { state, update, setIsLoading, isLoading } = context;
 
     const persistAuth = (data: any) => {
@@ -65,56 +63,36 @@ export function useAuth() {
         return { success: true };
     }
 
-    const googleLogin = async () => {
+    const googleAuth = async () => {
+        setIsLoading(true);
+
         try {
-            if (!(window as any).google || !(window as any).google.accounts || !(window as any).google.accounts.id) {
-                toast.error('Google SDK not loaded. Please check your configuration.');
-                return;
-            }
+            await authService.googleAuth();
+        } catch (error: any) {
+            console.error('Google auth error:', error);
+            toast.error(error.response?.data?.message || error.message || 'Google login failed');
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
-            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-            if (!clientId) {
-                toast.error('Google client ID is not configured.');
-                return;
-            }
-
+    const googleLogin = async (code: string) => {
+        try {
             setIsLoading(true);
-
-            await new Promise<void>((resolve, reject) => {
-                try {
-                    (window as any).google.accounts.id.initialize({
-                        client_id: clientId,
-                        callback: async (response: { credential: string }) => {
-                            try {
-                                const { token, user } = await authService.loginWithGoogle(
-                                    response.credential
-                                );
-                                persistAuth({ user, token });
-                                toast.success(`Welcome, ${user.username || user.email}!`);
-                                resolve();
-                            } catch (err: any) {
-                                console.error('Google login callback error:', err);
-                                const message =
-                                    err?.response?.data?.message || 'An error occurred during Google login.';
-                                toast.error(message);
-                                reject(err);
-                            }
-                        },
-                    });
-
-                    (window as any).google.accounts.id.prompt((notification: any) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            // User closed or prompt could not be displayed
-                            resolve();
-                        }
-                    });
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        } catch (error) {
+            const response = await authService.googleLogin(code);
+            
+            if (response.token && response.user) {
+                persistAuth({ user: response.user, token: response.token });
+                toast.success(`Welcome, ${response.user.username || response.user.email}!`);
+                return { success: true, user: response.user };
+            } else {
+                throw new Error('Invalid response from server');
+            }
+        } catch (error: any) {
             console.error('Google login error:', error);
-            toast.error('Failed to login with Google. Please try again.');
+            const message = error?.response?.data?.message || error?.message || 'Google login failed';
+            toast.error(message);
+            return { success: false, message };
         } finally {
             setIsLoading(false);
         }
@@ -130,9 +108,8 @@ export function useAuth() {
         login,
         register,
         logout,
+        googleAuth,
         googleLogin,
         requestPasswordReset,
     }
 }
-
-

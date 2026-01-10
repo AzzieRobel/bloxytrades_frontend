@@ -21,8 +21,16 @@ export class AuthService {
         return res.data;
     }
 
-    async loginWithGoogle(idToken: string): Promise<AuthResponse> {
-        const res = await api.post<AuthResponse>("/auth/google", { idToken });
-        return res.data;
+    // google
+    async googleLogin(code: string): Promise<AuthResponse> {
+        const response = await api.post<AuthResponse>("/auth/googleLogin", { code });
+        return response.data;
+    }
+
+    async googleAuth(): Promise<void> {
+        const response = await api.get<{ url: string }>("/auth/googleAuth");
+        const url = response.data.url;
+        // Redirect to Google OAuth
+        window.location.href = url;
     }
 }

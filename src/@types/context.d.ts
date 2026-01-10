@@ -8,7 +8,8 @@ interface GlobalContextType {
 interface InitialState {
     user: UserState | null;
     listings: Listing[];
-    sellerProfile: SellerProfile | null
+    sellerProfile: SellerProfile | null;
+    isLoading: boolean;
 }
 
 interface UserState {

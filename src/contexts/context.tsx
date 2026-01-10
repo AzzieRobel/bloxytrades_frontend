@@ -30,6 +30,7 @@ const initialState: InitialState = {
     user,
     listings: [],
     sellerProfile,
+    isLoading: false,
 }
 
 export const GlobalContextProvider = ({ children }: { children: React.ReactNode }) => {
