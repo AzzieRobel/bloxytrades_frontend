@@ -61,6 +61,16 @@ export function useUser() {
         } catch (error: any) { throw error }
     }
 
+    const getMyRobloxAssets = async (params?: { 
+        limit?: number; 
+        cursor?: string; 
+        assetTypeId?: number 
+    }) => {
+        try {
+            return await userService.getMyRobloxAssets(params);
+        } catch (error: any) { throw error }
+    }
+
     return { 
         user: state.user, 
         isLoading,
@@ -69,6 +79,7 @@ export function useUser() {
         changeUsername, 
         changePassword, 
         connectRoblox,
+        getMyRobloxAssets,
         reloadUser: loadUser
     };
 }

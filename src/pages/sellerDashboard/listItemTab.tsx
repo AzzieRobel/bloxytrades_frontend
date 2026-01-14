@@ -2,10 +2,11 @@ import React, { FormEvent, useState, useEffect } from "react";
 import { useListing } from "../../hooks/useListing";
 import { listingService } from "@/services";
 import toast from "react-hot-toast";
-import { ChevronDown, ChevronUp, Edit, Trash2, Power, PowerOff, Image as ImageIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Trash2, Power, PowerOff, Image as ImageIcon, Gamepad2 } from "lucide-react";
 import { ImageUploadModal } from "@/components/ImageUploadModal";
 import { EditListingModal } from "@/components/EditListingModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
+import { RobloxAssetSelector } from "@/components/RobloxAssetSelector";
 
 export const ListItemTab = () => {
     const { createListing, updateListing, removeListing } = useListing();
@@ -16,6 +17,7 @@ export const ListItemTab = () => {
     const [deletingListing, setDeletingListing] = useState<Listing | null>(null);
     const [isImageUploadModalOpen, setIsImageUploadModalOpen] = useState(false);
     const [isEditImageUploadModalOpen, setIsEditImageUploadModalOpen] = useState(false);
+    const [isRobloxAssetSelectorOpen, setIsRobloxAssetSelectorOpen] = useState(false);
 
     const [form, setForm] = useState({
         title: "",
@@ -371,7 +373,7 @@ export const ListItemTab = () => {
 
                             <div className="mb-2">
                                 <label className="block text-sm text-left text-gray-300 mb-1">Listing Image : </label>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 flex-wrap">
                                     {form.imageUrl ? (
                                         <div className="flex items-center gap-3">
                                             <img
@@ -379,23 +381,43 @@ export const ListItemTab = () => {
                                                 alt="Listing preview"
                                                 className="w-16 h-16 object-cover rounded border border-white/10"
                                             />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsImageUploadModalOpen(true)}
+                                                    className="px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-sm text-sm transition-colors"
+                                                >
+                                                    Change Image
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsRobloxAssetSelectorOpen(true)}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-sm text-sm transition-colors"
+                                                >
+                                                    <Gamepad2 className="w-4 h-4" />
+                                                    From Roblox
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
                                             <button
                                                 type="button"
                                                 onClick={() => setIsImageUploadModalOpen(true)}
-                                                className="px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-sm text-sm transition-colors"
+                                                className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-sm text-sm transition-colors"
                                             >
-                                                Change Image
+                                                <ImageIcon className="w-4 h-4" />
+                                                Upload Image
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsRobloxAssetSelectorOpen(true)}
+                                                className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-sm text-sm transition-colors"
+                                            >
+                                                <Gamepad2 className="w-4 h-4" />
+                                                Select from Roblox
                                             </button>
                                         </div>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsImageUploadModalOpen(true)}
-                                            className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-sm text-sm transition-colors"
-                                        >
-                                            <ImageIcon className="w-4 h-4" />
-                                            Upload Image
-                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -577,6 +599,21 @@ export const ListItemTab = () => {
                 onConfirm={handleDelete}
                 itemName={deletingListing?.itemName || ""}
                 isLoading={isLoading}
+            />
+
+            {/* Roblox Asset Selector */}
+            <RobloxAssetSelector
+                isOpen={isRobloxAssetSelectorOpen}
+                onClose={() => setIsRobloxAssetSelectorOpen(false)}
+                onSelectAsset={(asset) => {
+                    // Auto-fill form with asset data
+                    setForm(prev => ({
+                        ...prev,
+                        title: asset.name,
+                        imageUrl: asset.thumbnailUrl || `https://thumbnails.roblox.com/v1/assets?assetIds=${asset.assetId}&size=420x420&format=Png`,
+                    }));
+                    toast.success(`Selected ${asset.name} from your Roblox inventory`);
+                }}
             />
         </div>
     );

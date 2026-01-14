@@ -15,21 +15,16 @@ export default function SellerDashboard() {
     const { profile, isLoadingProfile } = useSeller();
     const { user, isLoading: isLoadingUser } = useUser();
 
-    // Check if onboarding is needed
-    const isPaymentConnected = profile?.payoutMethod && (
-        profile.payoutMethod.stripeConnected ||
-        (profile.payoutMethod.paypalEmail && profile.payoutMethod.paypalEmail.trim() !== "") ||
-        (profile.payoutMethod.cryptoWallets && (
-            profile.payoutMethod.cryptoWallets.btc ||
-            profile.payoutMethod.cryptoWallets.eth ||
-            profile.payoutMethod.cryptoWallets.usdt
-        ))
+    // Check if Roblox is connected and verified
+    const isRobloxConnected = !!(
+        user?.robloxUserId && 
+        user?.robloxUsername && 
+        user?.robloxVerifiedAt // Ensure it's verified, not just connected
     );
-    const isRobloxConnected = !!(user?.robloxUserId && user?.robloxUsername);
 
     // If profile doesn't exist yet, show onboarding
-    // If profile exists but is not enabled, or payment/roblox not connected, show onboarding
-    const needsOnboarding = !profile || !profile.isEnabled || !isPaymentConnected || !isRobloxConnected;
+    // If profile exists but is not enabled, or roblox not connected, show onboarding
+    const needsOnboarding = !profile || !profile.isEnabled || !isRobloxConnected;
 
     // Show loading state while profile or user is being fetched
     if (isLoadingProfile || isLoadingUser) {
@@ -40,7 +35,7 @@ export default function SellerDashboard() {
         );
     }
 
-    // Show onboarding if user needs to complete setup (payment or roblox not connected, or seller not enabled)
+    // Show onboarding if user needs to complete setup (roblox not connected, or seller not enabled)
     if (needsOnboarding) {
         return (
             <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
