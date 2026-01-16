@@ -71,6 +71,34 @@ export function useUser() {
         } catch (error: any) { throw error }
     }
 
+    const initiateRobloxVerification = async (robloxUsername: string) => {
+        try {
+            return await userService.initiateRobloxVerification(robloxUsername);
+        } catch (error: any) { throw error }
+    }
+
+    const verifyRobloxCode = async (verificationId: string) => {
+        try {
+            const result = await userService.verifyRobloxCode(verificationId);
+            if (result.success) {
+                await loadUser(); // Reload user data after successful verification
+            }
+            return result;
+        } catch (error: any) { throw error }
+    }
+
+    const getPendingRobloxVerification = async () => {
+        try {
+            return await userService.getPendingRobloxVerification();
+        } catch (error: any) { throw error }
+    }
+
+    const cancelRobloxVerification = async (verificationId: string) => {
+        try {
+            return await userService.cancelRobloxVerification(verificationId);
+        } catch (error: any) { throw error }
+    }
+
     return { 
         user: state.user, 
         isLoading,
@@ -80,6 +108,10 @@ export function useUser() {
         changePassword, 
         connectRoblox,
         getMyRobloxAssets,
+        initiateRobloxVerification,
+        verifyRobloxCode,
+        getPendingRobloxVerification,
+        cancelRobloxVerification,
         reloadUser: loadUser
     };
 }

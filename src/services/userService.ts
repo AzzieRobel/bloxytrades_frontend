@@ -20,10 +20,64 @@ export class UserService {
         return res.data;
     }
 
-    // roblox
+    // roblox - legacy method (deprecated)
     async connectRoblox(data: { robloxUserId: string, robloxUsername: string }) {
         const headers = await authService.headers();
         const res = await api.post("/users/connect-roblox", data, headers);
+        return res.data;
+    }
+
+    // Roblox profile verification methods
+    async initiateRobloxVerification(robloxUsername: string) {
+        const headers = await authService.headers();
+        const res = await api.post(
+            "/users/roblox/verify/initiate",
+            { robloxUsername },
+            headers
+        );
+        return res.data as {
+            verificationId: string;
+            verificationCode: string;
+            robloxUserId: string;
+            expiresAt: string;
+            instructions: string;
+        };
+    }
+
+    async verifyRobloxCode(verificationId: string) {
+        const headers = await authService.headers();
+        const res = await api.post(
+            "/users/roblox/verify/check",
+            { verificationId },
+            headers
+        );
+        return res.data as {
+            success: boolean;
+            message: string;
+            user: UserState;
+        };
+    }
+
+    async getPendingRobloxVerification() {
+        const headers = await authService.headers();
+        const res = await api.get("/users/roblox/verify/pending", headers);
+        return res.data as {
+            pending: {
+                verificationId: string;
+                verificationCode: string;
+                robloxUsername: string;
+                expiresAt: string;
+            } | null;
+        };
+    }
+
+    async cancelRobloxVerification(verificationId: string) {
+        const headers = await authService.headers();
+        const res = await api.post(
+            "/users/roblox/verify/cancel",
+            { verificationId },
+            headers
+        );
         return res.data;
     }
 
